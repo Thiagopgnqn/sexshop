@@ -9,9 +9,9 @@ const __dirname = path.dirname(__filename);
 const brandDir = path.resolve(__dirname, '../public/images/brand');
 const publicDir = path.resolve(__dirname, '../public');
 const pexelsSourceUrl =
-  'https://images.pexels.com/photos/4863069/pexels-photo-4863069.jpeg?auto=compress&cs=tinysrgb&w=1800';
+  'https://images.pexels.com/photos/10229385/pexels-photo-10229385.jpeg?auto=compress&cs=tinysrgb&w=1920';
 const localCachedSource =
-  'C:/Users/PC/.gemini/antigravity/brain/720e34ca-c04a-4f76-ac9b-eb756fc45ef2/scratch/pexels-4863069.jpg';
+  'C:/Users/PC/.gemini/antigravity/brain/720e34ca-c04a-4f76-ac9b-eb756fc45ef2/scratch/real-candidates/pexels-10229385.jpg';
 
 async function getHeroSourceBuffer() {
   if (fs.existsSync(localCachedSource)) {
@@ -28,62 +28,74 @@ async function buildHeroImages() {
   fs.mkdirSync(brandDir, { recursive: true });
   const srcBuffer = await getHeroSourceBuffer();
 
-  const width = 1400;
-  const height = 1050;
-
-  const vignetteSvg = Buffer.from(`
-    <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <radialGradient id="vignette" cx="56%" cy="48%" r="64%">
-          <stop offset="0%" stop-color="#2B1917" stop-opacity="0.06"/>
-          <stop offset="62%" stop-color="#1A1212" stop-opacity="0.42"/>
-          <stop offset="100%" stop-color="#0F0A0A" stop-opacity="0.95"/>
-        </radialGradient>
-        <linearGradient id="leftFade" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#0F0A0A" stop-opacity="0.96"/>
-          <stop offset="22%" stop-color="#0F0A0A" stop-opacity="0.18"/>
-          <stop offset="84%" stop-color="#0F0A0A" stop-opacity="0.10"/>
-          <stop offset="100%" stop-color="#0F0A0A" stop-opacity="0.90"/>
-        </linearGradient>
-        <linearGradient id="topBottomFade" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#0F0A0A" stop-opacity="0.86"/>
-          <stop offset="16%" stop-color="#0F0A0A" stop-opacity="0.08"/>
-          <stop offset="84%" stop-color="#0F0A0A" stop-opacity="0.10"/>
-          <stop offset="100%" stop-color="#0F0A0A" stop-opacity="0.92"/>
-        </linearGradient>
-      </defs>
-      <rect width="${width}" height="${height}" fill="url(#vignette)"/>
-      <rect width="${width}" height="${height}" fill="url(#leftFade)"/>
-      <rect width="${width}" height="${height}" fill="url(#topBottomFade)"/>
-    </svg>
-  `);
+  const width = 1920;
+  const height = 760;
 
   const heroPath = path.join(brandDir, 'hero.webp');
   const heroMobilePath = path.join(brandDir, 'hero-mobile.webp');
 
-  await sharp(srcBuffer)
-    .resize(width, height, { fit: 'cover', position: 'center' })
+  // Escalar la figura completa (1140x760) para que entre de pies a cabeza en el Hero panorámico
+  const subjectBuffer = await sharp(srcBuffer)
+    .resize(1140, height, { fit: 'cover', position: 'center' })
     .modulate({
-      brightness: 0.52,
-      saturation: 0.68,
-      hue: -10,
+      brightness: 1.08,
+      saturation: 1.1,
     })
-    .linear(1.15, -12)
-    .composite([{ input: vignetteSvg, blend: 'over' }])
-    .webp({ quality: 84, effort: 5 })
+    .toBuffer();
+
+  // Fundir el borde izquierdo de la foto (x=660..960) con el fondo #0F0A0A del lado izquierdo
+  const blendMaskSvg = Buffer.from(`
+    <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="leftBlend" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#0F0A0A" stop-opacity="1"/>
+          <stop offset="34%" stop-color="#0F0A0A" stop-opacity="1"/>
+          <stop offset="52%" stop-color="#0F0A0A" stop-opacity="0"/>
+          <stop offset="92%" stop-color="#0F0A0A" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#0F0A0A" stop-opacity="0.75"/>
+        </linearGradient>
+        <linearGradient id="vertBlend" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#0F0A0A" stop-opacity="0.45"/>
+          <stop offset="15%" stop-color="#0F0A0A" stop-opacity="0"/>
+          <stop offset="85%" stop-color="#0F0A0A" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#0F0A0A" stop-opacity="0.75"/>
+        </linearGradient>
+      </defs>
+      <rect width="${width}" height="${height}" fill="url(#leftBlend)"/>
+      <rect width="${width}" height="${height}" fill="url(#vertBlend)"/>
+    </svg>
+  `);
+
+  await sharp({
+    create: {
+      width,
+      height,
+      channels: 3,
+      background: { r: 15, g: 10, b: 10 },
+    },
+  })
+    .composite([
+      { input: subjectBuffer, left: 640, top: 0 },
+      { input: blendMaskSvg, left: 0, top: 0 },
+    ])
+    .webp({ quality: 86, effort: 5 })
     .toFile(heroPath);
 
-  await sharp(heroPath)
-    .resize(800, 600, { fit: 'cover', position: 'center' })
-    .webp({ quality: 78, effort: 5 })
+  await sharp(srcBuffer)
+    .resize(900, 750, { fit: 'cover', position: 'center' })
+    .modulate({
+      brightness: 1.05,
+      saturation: 1.08,
+    })
+    .webp({ quality: 82, effort: 5 })
     .toFile(heroMobilePath);
 
   const heroSize = fs.statSync(heroPath).size;
   const mobileSize = fs.statSync(heroMobilePath).size;
   console.log(
-    `[brand-images] hero.webp (${(heroSize / 1024).toFixed(1)} KB, 1400x1050) y hero-mobile.webp (${(
+    `[brand-images] hero.webp (${(heroSize / 1024).toFixed(1)} KB, ${width}x${height}) y hero-mobile.webp (${(
       mobileSize / 1024
-    ).toFixed(1)} KB, 800x600) generados.`
+    ).toFixed(1)} KB, 900x750) generados.`
   );
 }
 

@@ -181,133 +181,100 @@ const HomePage = () => {
 
   return (
     <div className="space-y-0">
-      {/* 1. Hero — Calibrado para entrar completo en 1366x768 y 1920x1080 sin scroll */}
-      <section className="relative min-h-[480px] lg:min-h-[530px] flex items-center smoke-texture border-b border-brand-border/20 overflow-hidden">
-        {/* Fondo en celular: imagen del hero con overlay oscuro para máxima legibilidad sin desplazar botones */}
-        <div className="absolute inset-0 lg:hidden pointer-events-none">
+      {/* 1. Hero — Imagen de fondo a pantalla completa (full-bleed) con overlay y textos a la izquierda */}
+      <section className="relative min-h-[480px] lg:min-h-[540px] flex items-center bg-canvas border-b border-brand-border/20 overflow-hidden">
+        {/* Imagen de fondo full-width en todo el Hero */}
+        <div className="absolute inset-0 pointer-events-none select-none">
           {!heroImgError && heroImageUrl ? (
             <img
-              src={heroMobileUrl || heroImageUrl}
-              srcSet={`${heroMobileUrl} 800w, ${heroImageUrl} 1400w`}
+              src={heroImageUrl}
+              srcSet={`${heroMobileUrl} 900w, ${heroImageUrl} 1920w`}
               sizes="100vw"
-              width="800"
-              height="600"
-              alt=""
-              aria-hidden="true"
+              width="1920"
+              height="760"
+              {...{ fetchpriority: 'high' }}
               decoding="async"
+              alt="Ambientación íntima nocturna — Nocturna SexShop"
               onError={() => setHeroImgError(true)}
-              className="w-full h-full object-cover opacity-45"
+              className="w-full h-full object-cover object-[68%_center] lg:object-center"
             />
           ) : (
-            <div className="w-full h-full opacity-50">
+            <div className="w-full h-full">
               <HeroBrandVisual />
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-b from-canvas/85 via-canvas/80 to-canvas" />
-        </div>
-
-        {/* Líneas arquitectónicas sutiles */}
-        <div className="absolute inset-0 pointer-events-none opacity-20">
-          <div className="max-w-7xl mx-auto h-full border-x border-brand-border/15" />
+          {/* Overlay equilibrado: protege la lectura del texto a la izquierda y deja ver con nitidez la fotografía */}
+          <div
+            aria-hidden="true"
+            className="
+              absolute inset-0
+              bg-gradient-to-r from-canvas/85 via-canvas/45 to-canvas/15
+            "
+          />
+          <div
+            aria-hidden="true"
+            className="
+              absolute inset-0
+              bg-gradient-to-t from-canvas via-transparent to-canvas/35
+            "
+          />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12 w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
-            {/* Columna izquierda: Texto y CTAs */}
-            <div className="lg:col-span-7 max-w-2xl">
-              <span className="inline-block text-[10px] sm:text-[11px] uppercase tracking-[0.28em] text-mauve font-medium mb-3">
-                Córdoba, Argentina &bull; Boutique Íntima Online
-              </span>
+          <div className="max-w-2xl">
+            <span className="inline-block text-[10px] sm:text-[11px] uppercase tracking-[0.28em] text-mauve font-medium mb-3">
+              Córdoba, Argentina &bull; Boutique Íntima Online
+            </span>
 
-              <h1 className="font-display text-3xl sm:text-4xl lg:text-[2.65rem] xl:text-5xl font-light uppercase tracking-[0.12em] text-content mb-4 leading-[1.14]">
-                Intimidad, <br />
-                diseño y placer <br />
-                <span className="text-mauve">sin tabúes.</span>
-              </h1>
+            <h1 className="font-display text-3xl sm:text-4xl lg:text-[2.65rem] xl:text-5xl font-light uppercase tracking-[0.12em] text-content mb-4 leading-[1.14] drop-shadow-sm">
+              Intimidad, <br />
+              diseño y placer <br />
+              <span className="text-mauve">sin tabúes.</span>
+            </h1>
 
-              <p className="text-xs sm:text-sm lg:text-[15px] text-content-secondary mb-6 font-normal leading-relaxed max-w-xl">
-                Una selección curada de bienestar íntimo, cosmética sensorial y lencería.
-                Comprá con total reserva desde tu casa: envíos 100% discretos en Córdoba y atención personalizada por WhatsApp.
-              </p>
+            <p className="text-xs sm:text-sm lg:text-[15px] text-content-secondary mb-6 font-normal leading-relaxed max-w-xl drop-shadow-sm">
+              Una selección curada de bienestar íntimo, cosmética sensorial y lencería.
+              Comprá con total reserva desde tu casa: envíos 100% discretos en Córdoba y atención personalizada por WhatsApp.
+            </p>
 
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                <Link to="/catalogo">
-                  <Button size="lg" variant="primary" className="w-full sm:w-auto px-7 py-3">
-                    <span>Explorar Colección</span>
-                    <FiArrowRight className="ml-2.5" />
-                  </Button>
-                </Link>
-                <a
-                  href={`https://wa.me/${themeConfig.contact.whatsapp}?text=${encodeURIComponent(
-                    themeConfig.contact.whatsappDefaultMessage
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <Link to="/catalogo">
+                <Button size="lg" variant="primary" className="w-full sm:w-auto px-7 py-3">
+                  <span>Explorar Colección</span>
+                  <FiArrowRight className="ml-2.5" />
+                </Button>
+              </Link>
+              <a
+                href={`https://wa.me/${themeConfig.contact.whatsapp}?text=${encodeURIComponent(
+                  themeConfig.contact.whatsappDefaultMessage
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full sm:w-auto px-6 py-3 bg-canvas/45 backdrop-blur-[2px]"
                 >
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto px-6 py-3">
-                    <FaWhatsapp className="mr-2 text-mauve text-base" />
-                    <span>Asesoramiento Privado</span>
-                  </Button>
-                </a>
-              </div>
-
-              <div className="mt-7 pt-4 border-t border-brand-border/20 flex flex-wrap items-center gap-y-2 gap-x-5 text-[11px] sm:text-xs text-content-muted">
-                <span className="inline-flex items-center gap-1.5">
-                  <FiEyeOff className="text-mauve" />
-                  Empaque neutro sin logos
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <FiShield className="text-mauve" />
-                  Sin mínimo de compra
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <FiLock className="text-mauve" />
-                  Atención confidencial
-                </span>
-              </div>
+                  <FaWhatsapp className="mr-2 text-mauve text-base" />
+                  <span>Asesoramiento Privado</span>
+                </Button>
+              </a>
             </div>
 
-            {/* Columna derecha en escritorio: Fotografía de seda bordó fundida con #0F0A0A o visual de marca */}
-            <div className="hidden lg:block lg:col-span-5">
-              {!heroImgError && heroImageUrl ? (
-                <div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden border border-mauve/20 bg-canvas shadow-2xl">
-                  <img
-                    src={heroImageUrl}
-                    srcSet={`${heroMobileUrl} 800w, ${heroImageUrl} 1400w`}
-                    sizes="(max-width: 1024px) 100vw, 42vw"
-                    width="1400"
-                    height="1050"
-                    {...{ fetchpriority: 'high' }}
-                    decoding="async"
-                    alt="Textura de seda y satén bordó oscuro — Nocturna SexShop"
-                    onError={() => setHeroImgError(true)}
-                    className="w-full h-full object-cover"
-                  />
-                  {/* Degradés suaves para fundir la foto con el fondo #0F0A0A sin cortes duros */}
-                  <div
-                    aria-hidden="true"
-                    className="
-                      absolute inset-0 pointer-events-none
-                      bg-gradient-to-r from-canvas/90 via-transparent to-canvas/75
-                    "
-                  />
-                  <div
-                    aria-hidden="true"
-                    className="
-                      absolute inset-0 pointer-events-none
-                      bg-gradient-to-t from-canvas/85 via-transparent to-canvas/65
-                    "
-                  />
-                  <div
-                    aria-hidden="true"
-                    className="absolute inset-3 rounded-lg border border-mauve/15 pointer-events-none"
-                  />
-                </div>
-              ) : (
-                <div className="aspect-[4/3] w-full">
-                  <HeroBrandVisual />
-                </div>
-              )}
+            <div className="mt-7 pt-4 border-t border-brand-border/25 flex flex-wrap items-center gap-y-2 gap-x-5 text-[11px] sm:text-xs text-content-secondary">
+              <span className="inline-flex items-center gap-1.5">
+                <FiEyeOff className="text-mauve" />
+                Empaque neutro sin logos
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <FiShield className="text-mauve" />
+                Sin mínimo de compra
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <FiLock className="text-mauve" />
+                Atención confidencial
+              </span>
             </div>
           </div>
         </div>
