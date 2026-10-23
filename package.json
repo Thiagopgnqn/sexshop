@@ -1,0 +1,12 @@
+{
+  "name": "nocturna-sexshop",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Tienda online de Nocturna SexShop — Córdoba, Argentina",
+  "scripts": {
+    "import:catalog": "npm --prefix backend run import:catalog",
+    "build": "npm --prefix frontend run build",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev"
+  }
+}

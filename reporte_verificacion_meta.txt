@@ -1,0 +1,64 @@
+======================================================================
+REPORTE DE VERIFICACIÓN — META PIXEL & API DE CONVERSIONES (CAPI)
+Proyecto: NOCTURNA SEXSHOP (Córdoba, Argentina)
+======================================================================
+
+1. CONFIGURACIÓN POR VARIABLES DE ENTORNO
+----------------------------------------------------------------------
+- Frontend (`frontend/src/utils/metaPixel.js`):
+  El Píxel de Meta se inicializa únicamente si existe `VITE_META_PIXEL_ID`.
+  Si la variable está vacía o ausente, no se inyecta `fbevents.js` ni se
+  realizan llamadas a `window.fbq`.
+
+- Backend (`backend/src/services/meta.service.js`):
+  La API de Conversiones (CAPI) se ejecuta únicamente si están definidas
+  `META_PIXEL_ID` y `META_CAPI_ACCESS_TOKEN` en `backend/.env`.
+
+2. AUDITORÍA DE PRIVACIDAD DE PAYLOADS (SIN NOMBRES NI CATEGORÍAS)
+----------------------------------------------------------------------
+Cumpliendo con las políticas de Meta para tiendas de bienestar íntimo (+18),
+se eliminó toda transmisión de `content_name`, `content_category` y
+descripciones de producto tanto en el navegador como en el servidor:
+
+- Evento `ViewContent` (`frontend/src/pages/ProductPage.jsx` -> `trackViewContent`):
+  Payload enviado:
+  {
+    content_ids: [String(sku || id)],
+    content_type: 'product',
+    value: Number(price),
+    currency: 'ARS'
+  }
+  (Sin `content_name` ni categoría).
+
+- Evento `AddToCart` (`frontend/src/context/CartContext.jsx` -> `trackAddToCart`):
+  Payload enviado:
+  {
+    content_ids: [String(sku || id)],
+    content_type: 'product',
+    value: Number(price * quantity),
+    currency: 'ARS',
+    num_items: Number(quantity)
+  }
+  (Sin `content_name` ni categoría).
+
+- Evento `InitiateCheckout` (`frontend/src/pages/CheckoutPage.jsx` -> `trackInitiateCheckout`):
+  Payload enviado:
+  {
+    content_ids: [...],
+    content_type: 'product',
+    value: Number(total),
+    currency: 'ARS',
+    num_items: Number(count)
+  }
+
+- Evento `Purchase` (Navegador + Backend CAPI en `backend/src/services/meta.service.js`):
+  Payload `custom_data` enviado:
+  {
+    currency: 'ARS',
+    value: Number(order.total),
+    content_type: 'product',
+    content_ids: [...],
+    contents: [{ id: String(sku || productId), quantity, item_price }],
+    num_items: Number(totalUnits)
+  }
+  Datos de cliente (`em`, `ph`, `fn`, `ct`, `st`, `zp`, `country`) hasheados con SHA-256.

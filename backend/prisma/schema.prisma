@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String         @id @default(cuid())
+  email        String         @unique
+  passwordHash String
+  name         String
+  phone        String?
+  role         String         @default("CUSTOMER") // CUSTOMER | ADMIN
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  orders       Order[]
+  tokens       RefreshToken[]
+}
+
+model Category {
+  id        String     @id @default(cuid())
+  name      String
+  slug      String     @unique
+  parentId  String?
+  order     Int        @default(0)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  parent    Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children  Category[] @relation("CategoryHierarchy")
+  products  Product[]
+}
+
+model Product {
+  id            String           @id @default(cuid())
+  name          String
+  description   String?          @default("")
+  sku           String?          @unique
+  price         Decimal
+  transferPrice Decimal?
+  stock         Int              @default(0)
+  imageUrl      String?
+  badge         String?
+  brand         String?
+  categoryId    String?
+  active        Boolean          @default(true)
+  soldCount     Int              @default(0)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  category      Category?        @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  variants      ProductVariant[]
+  orderItems    OrderItem[]
+}
+
+model ProductVariant {
+  id         String      @id @default(cuid())
+  productId  String
+  sku        String      @unique
+  type       String?
+  size       String?
+  color      String?
+  flavor     String?
+  volume     String?
+  price      Decimal
+  stock      Int         @default(0)
+  active     Boolean     @default(true)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  userId          String?
+  customerName    String
+  customerPhone   String
+  customerEmail   String
+  customerAddress String?
+  deliveryMethod  String      // PICKUP | DELIVERY
+  comments        String?
+  status          String      @default("PENDING") // PENDING | CONFIRMED | DELIVERED | CANCELLED
+  total           Decimal
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  user            User?       @relation(fields: [userId], references: [id])
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id                 String          @id @default(cuid())
+  orderId            String
+  productId          String
+  variantId          String?
+  variantDescription String?
+  quantity           Int
+  unitPrice          Decimal
+  subtotal           Decimal
+  order              Order           @relation(fields: [orderId], references: [id])
+  product            Product         @relation(fields: [productId], references: [id])
+  variant            ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
