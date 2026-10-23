@@ -5,6 +5,7 @@ import CheckoutForm from '../components/checkout/CheckoutForm';
 import ProductPlaceholder from '../components/ui/ProductPlaceholder';
 import { trackInitiateCheckout } from '../utils/metaPixel';
 import { formatVariantDescription } from '../context/CartContext';
+import { resolveProductImage } from '../utils/productImages';
 import { FiLock, FiShield } from 'react-icons/fi';
 import themeConfig from '../config/theme';
 import useSEO from '../hooks/useSEO';
@@ -83,17 +84,28 @@ const CheckoutPage = () => {
                       : Number(item.product.price || 0);
                   const variantLabel =
                     item.variantDescription || formatVariantDescription(item.variant);
+                  const resolvedImg = resolveProductImage(item.product, item.variant);
+                  const thumbUrl = resolvedImg?.thumb || resolvedImg?.main || null;
                   return (
                     <li
                       key={item.key || `${item.product._id || item.product.id}__${item.variant?.id || 'base'}`}
                       className="py-3 flex items-center gap-3"
                     >
                       <div className="h-12 w-12 flex-shrink-0 bg-canvas rounded border border-brand-border/20 overflow-hidden flex items-center justify-center">
-                        {(item.product.imageUrl || item.product.image) ? (
+                        {thumbUrl ? (
                           <img
-                            src={item.product.imageUrl || item.product.image}
-                            alt=""
+                            src={thumbUrl}
+                            srcSet={resolvedImg?.srcSet}
+                            sizes="48px"
+                            width="48"
+                            height="48"
+                            loading="lazy"
+                            decoding="async"
+                            alt={`${item.product.name}${variantLabel ? ` (${variantLabel})` : ''}`}
                             className="h-full w-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
                           />
                         ) : (
                           <ProductPlaceholder size="sm" showLabel={false} />

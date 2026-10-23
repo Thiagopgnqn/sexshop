@@ -1,0 +1,4 @@
+# Colocá acá las fotos originales de productos nombradas por su SKU:
+# Ejemplo: 4580.jpg, 145R.png, 422.webp
+# Para galería adicional de un mismo SKU: 4580-2.jpg, 4580-3.jpg
+# Luego ejecutá: npm run images:build

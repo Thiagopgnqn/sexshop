@@ -1,20 +1,28 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FiTrash2, FiPlus, FiMinus } from 'react-icons/fi';
 import useCart from '../../hooks/useCart';
 import themeConfig from '../../config/theme';
 import ProductPlaceholder from '../ui/ProductPlaceholder';
 import { formatVariantDescription } from '../../context/CartContext';
+import { resolveProductImage } from '../../utils/productImages';
 
 const CartItem = ({ item }) => {
   const { updateQuantity, removeFromCart } = useCart();
   const { product, variant, quantity } = item;
+  const [imgError, setImgError] = useState(false);
 
   const productId = product._id || product.id;
   const variantId = variant?.id || null;
   const maxStock = variant ? Number(variant.stock ?? 0) : Number(product.stock ?? 0);
   const unitPrice = variant?.price != null ? Number(variant.price) : Number(product.price || 0);
   const variantLabel = item.variantDescription || formatVariantDescription(variant);
+  const resolvedImg = resolveProductImage(product, variant);
+  const imageUrl = resolvedImg?.thumb || resolvedImg?.main || null;
+
+  useEffect(() => {
+    setImgError(false);
+  }, [imageUrl]);
 
   const handleDecrease = () => {
     if (quantity > 1) {
@@ -34,12 +42,18 @@ const CartItem = ({ item }) => {
     <div className="flex py-5 gap-4 border-b border-brand-border/15 items-center">
       {/* Thumbnail de producto */}
       <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded border border-brand-border/20 bg-canvas flex items-center justify-center">
-        {(product.imageUrl || product.image) ? (
+        {imageUrl && !imgError ? (
           <img
-            src={product.imageUrl || product.image}
-            alt={product.name}
+            src={imageUrl}
+            srcSet={resolvedImg?.srcSet}
+            sizes="80px"
+            width="80"
+            height="80"
+            loading="lazy"
+            decoding="async"
+            alt={`${product.name}${variantLabel ? ` (${variantLabel})` : ''}`}
             className="h-full w-full object-cover object-center"
-            onError={(e) => { e.target.style.display = 'none'; }}
+            onError={() => setImgError(true)}
           />
         ) : (
           <ProductPlaceholder size="sm" showLabel={false} />

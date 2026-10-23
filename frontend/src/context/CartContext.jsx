@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect, useCallback } from 'react';
 import Toast from '../components/ui/Toast';
 import { trackAddToCart } from '../utils/metaPixel';
 import { isDemoMode, loadDemoState, saveDemoState } from '../api/demo/demoAdapter';
+import { resolveProductImage } from '../utils/productImages';
 
 export const CartContext = createContext();
 
@@ -106,13 +107,14 @@ export const CartProvider = ({ children }) => {
       quantity,
     });
 
+    const resolvedImg = resolveProductImage(product, variant);
     setNotification({
       show: true,
       message: `${product.name} agregado al carrito`,
       product: {
         name: product.name,
         price: unitPrice,
-        imageUrl: product.imageUrl || product.image,
+        imageUrl: resolvedImg?.thumb || resolvedImg?.main || product.imageUrl || product.image,
         variantDescription,
       },
     });

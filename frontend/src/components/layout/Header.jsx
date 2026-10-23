@@ -56,9 +56,9 @@ const Header = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16 sm:h-20">
+        <div className="flex justify-between items-center h-16 gap-4 lg:gap-8">
           {/* Logo & Mobile Menu Button */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 flex-shrink-0">
             <button
               className="lg:hidden p-2 -ml-2 text-content-secondary hover:text-content rounded-md focus:outline-none"
               onClick={() => setMobileMenuOpen(true)}
@@ -66,7 +66,7 @@ const Header = () => {
             >
               <FiMenu className="h-5 w-5" />
             </button>
-            <Link to="/" className="flex items-center group">
+            <Link to="/" className="flex items-center group pr-2 xl:pr-4">
               <Logo
                 variant="horizontal"
                 className="group-hover:opacity-85 transition-opacity"
@@ -74,8 +74,11 @@ const Header = () => {
             </Link>
           </div>
 
-          {/* Navegación Desktop */}
-          <nav className="hidden lg:flex items-center space-x-7 text-sm">
+          {/* Navegación Desktop — una sola línea garantizada (1280px a 1920px) */}
+          <nav
+            aria-label="Navegación principal"
+            className="hidden lg:flex items-center justify-center gap-4 xl:gap-6 flex-1 min-w-0"
+          >
             {themeConfig.navigation.map((item) => {
               const isActive =
                 location.pathname + location.search === item.href ||
@@ -86,7 +89,7 @@ const Header = () => {
                 <Link
                   key={item.label}
                   to={item.href}
-                  className={`font-normal transition-colors hover:text-content relative py-1 text-xs tracking-[0.12em] uppercase ${
+                  className={`whitespace-nowrap font-normal transition-colors hover:text-content relative py-1 text-[11px] xl:text-xs tracking-[0.07em] xl:tracking-[0.09em] uppercase ${
                     isActive
                       ? 'text-content font-medium border-b border-mauve'
                       : 'text-content-secondary'
@@ -99,7 +102,7 @@ const Header = () => {
           </nav>
 
           {/* Acciones de la derecha: Búsqueda, Carrito, Usuario */}
-          <div className="flex items-center space-x-2 sm:space-x-3">
+          <div className="flex items-center space-x-1.5 sm:space-x-2.5 flex-shrink-0">
             <Link
               to="/catalogo"
               className="p-2 text-content-secondary hover:text-content hover:bg-surface-elevated rounded-full transition-colors"

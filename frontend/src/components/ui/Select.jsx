@@ -10,7 +10,7 @@ const Select = forwardRef(({ label, error, options, className = '', ...props }, 
       )}
       <select
         ref={ref}
-        className={`block w-full rounded-md bg-surface-subtle border border-border text-content text-sm py-2 px-3 transition-smooth focus:outline-none focus:border-mauve focus:ring-1 focus:ring-mauve shadow-soft ${
+        className={`block w-full rounded-md bg-surface-subtle border border-border text-content text-sm py-2 px-3 transition-smooth focus:outline-none focus:border-mauve focus:ring-1 focus:ring-mauve shadow-soft disabled:opacity-50 disabled:cursor-not-allowed ${
           error ? 'border-status-error focus:border-status-error focus:ring-status-error' : ''
         } ${className}`}
         {...props}

@@ -23,9 +23,13 @@ backend/prisma/*.db
 backend/prisma/*.db-journal
 postgres_data/
 
-# Uploads
+# Uploads & Raw Source Images (optimized WebP in frontend/public/images/ ARE committed)
 backend/uploads/*
 !backend/uploads/.gitkeep
+images-source/products/*
+!images-source/products/.gitkeep
+images-source/brand/*
+!images-source/brand/.gitkeep
 
 # IDE
 .vscode/

@@ -41,7 +41,8 @@
 }
 
 /* Textura sutil tipo tela/humo bordó en CSS liviana */
-.nocturna-smoke {
+.nocturna-smoke,
+.smoke-texture {
   background-color: #0F0A0A;
   background-image:
     radial-gradient(ellipse 80% 60% at 18% 22%, rgba(90, 42, 46, 0.28) 0%, transparent 65%),
@@ -56,17 +57,47 @@
     );
 }
 
-.nocturna-silk-card {
+.nocturna-silk-card,
+.smoke-card-texture {
   background-color: #1A1212;
   background-image:
-    radial-gradient(circle at 85% 15%, rgba(90, 42, 46, 0.22) 0%, transparent 55%),
-    radial-gradient(circle at 15% 85%, rgba(43, 25, 23, 0.45) 0%, transparent 60%);
+    radial-gradient(circle at 82% 18%, rgba(90, 42, 46, 0.28) 0%, transparent 58%),
+    radial-gradient(circle at 18% 82%, rgba(43, 25, 23, 0.55) 0%, transparent 62%),
+    radial-gradient(circle at 50% 50%, rgba(144, 120, 120, 0.05) 0%, transparent 70%);
+}
+
+@keyframes nocturnaSlowDrift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-1.5%, 1.5%, 0) scale(1.03);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.animate-silk-drift {
+  animation: nocturnaSlowDrift 18s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-silk-drift {
+    animation: none !important;
+    transform: none !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 /* Soporte para Forced Colors Mode (Accesibilidad Windows High Contrast) */
 @media (forced-colors: active) {
   .nocturna-smoke,
-  .nocturna-silk-card {
+  .smoke-texture,
+  .nocturna-silk-card,
+  .smoke-card-texture {
     background-image: none;
     border: 1px solid CanvasText;
   }

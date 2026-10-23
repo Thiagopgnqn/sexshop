@@ -9,6 +9,7 @@ import Badge from '../components/ui/Badge';
 import ProductPlaceholder from '../components/ui/ProductPlaceholder';
 import { trackViewContent } from '../utils/metaPixel';
 import { formatVariantDescription } from '../context/CartContext';
+import { resolveProductImage } from '../utils/productImages';
 import {
   FiArrowLeft,
   FiShield,
@@ -29,6 +30,7 @@ const ProductPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [imgError, setImgError] = useState(false);
+  const [activeGalleryIdx, setActiveGalleryIdx] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [openTab, setOpenTab] = useState('shipping');
   const { addToCart } = useCart();
@@ -85,9 +87,17 @@ const ProductPage = () => {
 
   useEffect(() => {
     setQuantity(1);
-  }, [selectedVariantId]);
+    setActiveGalleryIdx(0);
+    setImgError(false);
+  }, [selectedVariantId, product?.id]);
 
-  const imageUrl = product?.imageUrl || product?.image;
+  const resolvedImg = useMemo(
+    () => resolveProductImage(product, selectedVariant),
+    [product, selectedVariant]
+  );
+  const gallery = resolvedImg?.gallery || [];
+  const currentGalleryItem = gallery[activeGalleryIdx] || gallery[0] || null;
+  const imageUrl = currentGalleryItem?.main || resolvedImg?.main || null;
   const priceFormatted = activePrice.toLocaleString('es-AR');
   const categoryLabel = product?.category?.parent?.name
     ? `${product.category.parent.name} · ${product.category.name}`
@@ -181,14 +191,22 @@ const ProductPage = () => {
       </Link>
 
       <div className="lg:grid lg:grid-cols-12 lg:gap-x-12 lg:items-start">
-        {/* Columna Izquierda: Imagen Principal */}
+        {/* Columna Izquierda: Imagen Principal y Galería */}
         <div className="lg:col-span-6 mb-10 lg:mb-0">
           <div className="aspect-square w-full rounded-lg overflow-hidden bg-surface border border-brand-border/20 flex items-center justify-center relative">
             {imageUrl && !imgError ? (
               <img
                 src={imageUrl}
-                alt={product.name}
+                srcSet={currentGalleryItem?.srcSet || resolvedImg?.srcSet}
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                width="800"
+                height="800"
+                alt={`${product.name}${
+                  selectedVariant ? ` — ${formatVariantDescription(selectedVariant)}` : ''
+                }`}
                 className="w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
                 onError={() => setImgError(true)}
               />
             ) : (
@@ -201,6 +219,41 @@ const ProductPage = () => {
               </div>
             )}
           </div>
+
+          {/* Miniaturas de galería cuando existen {SKU}-2, {SKU}-3... */}
+          {gallery.length > 1 && !imgError && (
+            <div className="mt-3 flex items-center gap-2.5 overflow-x-auto pb-1">
+              {gallery.map((gItem, idx) => {
+                const isCurrent = idx === activeGalleryIdx;
+                return (
+                  <button
+                    key={gItem.main || idx}
+                    type="button"
+                    onClick={() => {
+                      setActiveGalleryIdx(idx);
+                      setImgError(false);
+                    }}
+                    className={`w-16 h-16 rounded-md overflow-hidden border flex-shrink-0 transition-all ${
+                      isCurrent
+                        ? 'border-mauve ring-1 ring-mauve opacity-100'
+                        : 'border-brand-border/25 opacity-60 hover:opacity-100'
+                    }`}
+                    aria-label={`Ver imagen ${idx + 1} de ${product.name}`}
+                  >
+                    <img
+                      src={gItem.thumb || gItem.main}
+                      width="80"
+                      height="80"
+                      loading="lazy"
+                      decoding="async"
+                      alt={`${product.name} vista ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           {/* Garantías de privacidad debajo de la imagen */}
           <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-content-secondary">

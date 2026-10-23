@@ -49,6 +49,7 @@ export const themeConfig = {
     logo: '/brand/logo-horizontal.svg',
     logoVertical: '/brand/logo-vertical.svg',
     profileImage: '/brand/instagram-profile.jpg',
+    ogImage: '/images/brand/og-image.png',
     favicon: '/favicon.svg',
     description:
       'Boutique íntima online en Córdoba, Argentina. Lencería, cosmética sensorial, juegos y bienestar íntimo con asesoramiento cercano y envíos 100% discretos.',
@@ -59,13 +60,13 @@ export const themeConfig = {
   },
 
   navigation: [
-    { label: 'Inicio', href: '/' },
     { label: 'Catálogo', href: '/catalogo' },
     { label: 'Lencería', href: '/catalogo?category=lenceria' },
-    { label: 'Cosmética Íntima', href: '/catalogo?category=cosmetica-intima' },
-    { label: 'Bienestar & Juguetes', href: '/catalogo?category=dilatadores-consoladores-y-vibradores' },
+    { label: 'Cosmética', href: '/catalogo?category=cosmetica-intima' },
+    { label: 'Juguetes', href: '/catalogo?category=dilatadores-consoladores-y-vibradores' },
     { label: 'Fantasías', href: '/catalogo?category=fantasias' },
-    { label: 'Preguntas Frecuentes', href: '/#faq' },
+    { label: 'Juegos & BDSM', href: '/catalogo?category=bdsm-y-arneses' },
+    { label: 'FAQ', href: '/#faq' },
   ],
 
   benefits: [
@@ -99,26 +100,26 @@ export const themeConfig = {
     {
       id: 'lenceria',
       slug: 'lenceria',
-      title: 'Lencería & Diseño',
-      subtitle: 'Baby dolls, bodys, conjuntos y medias',
+      title: 'Lencería',
+      subtitle: 'Baby dolls, bodys, vestidos y conjuntos',
       description:
-        'Encajes, microtul y texturas pensadas para realzar la silueta con delicadeza y carácter.',
+        'Encajes, microtul y vinilo diseñados para realzar la silueta con delicadeza y carácter.',
       iconType: 'lingerie',
     },
     {
-      id: 'lubricantes',
+      id: 'cosmetica-intima',
       slug: 'cosmetica-intima',
-      title: 'Cosmética Sensorial',
-      subtitle: 'Geles, aceites de masaje y velas tibias',
+      title: 'Cosmética Íntima',
+      subtitle: 'Geles, aceites comestibles y velas de masaje',
       description:
-        'Fórmulas hidratantes, efectos térmicos y aromas envolventes para despertar los sentidos.',
+        'Fórmulas sensoriales, efectos térmicos y aromas envolventes para el cuidado y el masaje.',
       iconType: 'cosmetics',
     },
     {
-      id: 'juguetes',
+      id: 'dilatadores-consoladores-y-vibradores',
       slug: 'dilatadores-consoladores-y-vibradores',
-      title: 'Placer & Estimulación',
-      subtitle: 'Vibradores, anillos y estimuladores',
+      title: 'Bienestar & Juguetes',
+      subtitle: 'Vibradores, consoladores y dilatadores',
       description:
         'Selección curada para explorar en solitario o en pareja con materiales seguros.',
       iconType: 'toys',
@@ -126,11 +127,56 @@ export const themeConfig = {
     {
       id: 'fantasias',
       slug: 'fantasias',
-      title: 'Fantasías & Juegos',
-      subtitle: 'Línea Pasionel, BDSM suave y dados',
+      title: 'Fantasías',
+      subtitle: 'Línea Pasionel, Free Size y Queen',
       description:
-        'Propuestas lúdicas, accesorios de rol y dinámicas para salir de la rutina.',
+        'Conjuntos temáticos y propuestas de rol en talles adaptables y líneas especiales.',
+      iconType: 'fantasies',
+    },
+    {
+      id: 'perfumes-y-feromonas',
+      slug: 'perfumes-y-feromonas',
+      title: 'Perfumes & Feromonas',
+      subtitle: 'Fragancias íntimas y body splash',
+      description:
+        'Notas envolventes y extractos con feromonas pensados para acompañar momentos cercanos.',
+      iconType: 'perfumes',
+    },
+    {
+      id: 'bdsm-y-arneses',
+      slug: 'bdsm-y-arneses',
+      title: 'BDSM & Arneses',
+      subtitle: 'Esposas, antifaces, fustas y kits',
+      description:
+        'Accesorios de sujeción suave, antifaces de satén y kits coordinados para explorar.',
+      iconType: 'bdsm',
+    },
+    {
+      id: 'anillos-y-estimuladores',
+      slug: 'anillos-y-estimuladores',
+      title: 'Anillos & Estimuladores',
+      subtitle: 'Anillos con vibración y texturas',
+      description:
+        'Complementos compactos y silenciosos diseñados para prolongar y potenciar el placer.',
+      iconType: 'rings',
+    },
+    {
+      id: 'juegos',
+      slug: 'juegos',
+      title: 'Juegos para Parejas',
+      subtitle: 'Dados, naipes y juegos de mesa',
+      description:
+        'Dinámicas lúdicas y desafíos pensados para romper la rutina y conectar desde el juego.',
       iconType: 'games',
+    },
+    {
+      id: 'linea-masculina',
+      slug: 'linea-masculina',
+      title: 'Línea Masculina',
+      subtitle: 'Prendas y diseños masculinos',
+      description:
+        'Cortes anatómicos y telas elastizadas con estilo nocturno y ajuste cómodo.',
+      iconType: 'mens',
     },
   ],
 

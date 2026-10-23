@@ -2,6 +2,7 @@ import React from 'react';
 import Badge from '../ui/Badge';
 import { FiEdit2, FiTrash2, FiBox } from 'react-icons/fi';
 import themeConfig from '../../config/theme';
+import { resolveProductImage } from '../../utils/productImages';
 
 const ProductTable = ({ products, onEdit, onDelete }) => {
   return (
@@ -11,7 +12,8 @@ const ProductTable = ({ products, onEdit, onDelete }) => {
         {products.map((product) => {
           const productId = product.id || product._id;
           const priceFormatted = Number(product.price || 0).toLocaleString('es-AR');
-          const imageUrl = product.imageUrl || product.image;
+          const resolvedImg = resolveProductImage(product);
+          const imageUrl = resolvedImg?.thumb || resolvedImg?.main || product.imageUrl || product.image;
           const variantCount = Array.isArray(product.variants) ? product.variants.length : 0;
           const totalStock =
             variantCount > 0
@@ -126,7 +128,8 @@ const ProductTable = ({ products, onEdit, onDelete }) => {
             {products.map((product) => {
               const productId = product.id || product._id;
               const priceFormatted = Number(product.price || 0).toLocaleString('es-AR');
-              const imageUrl = product.imageUrl || product.image;
+              const resolvedImg = resolveProductImage(product);
+              const imageUrl = resolvedImg?.thumb || resolvedImg?.main || product.imageUrl || product.image;
               const variantCount = Array.isArray(product.variants) ? product.variants.length : 0;
               const totalStock =
                 variantCount > 0

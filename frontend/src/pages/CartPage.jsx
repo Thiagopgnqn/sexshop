@@ -29,20 +29,41 @@ const CartPage = () => {
         </div>
 
         {items.length === 0 ? (
-          <div className="text-center py-20 px-4 bg-surface rounded-lg border border-brand-border/20 max-w-lg mx-auto">
-            <FiShoppingBag className="mx-auto text-4xl text-mauve/40 mb-4" />
-            <h2 className="font-display text-lg uppercase tracking-widest text-content mb-2">
-              Tu carrito está vacío
-            </h2>
-            <p className="text-content-secondary text-xs sm:text-sm mb-6 max-w-sm mx-auto leading-relaxed">
-              Explorá nuestra colección de bienestar íntimo, lencería y cosmética sensorial con entrega confidencial en Córdoba.
-            </p>
-            <Link to="/catalogo">
-              <Button variant="primary" size="lg" className="px-6 text-xs sm:text-sm">
-                <span>Explorar Catálogo</span>
-                <FiArrowRight className="ml-2 text-xs" />
-              </Button>
-            </Link>
+          <div className="relative overflow-hidden text-center py-16 sm:py-20 px-6 smoke-card-texture rounded-xl border border-brand-border/25 max-w-lg mx-auto shadow-xl">
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 400 220"
+              fill="none"
+              className="absolute inset-0 w-full h-full object-cover opacity-45 pointer-events-none"
+            >
+              <path
+                d="M-20,180 C110,110 240,210 420,100 L420,230 L-20,230 Z"
+                fill="#2B1917"
+                fillOpacity="0.65"
+              />
+              <circle cx="200" cy="95" r="72" stroke="#907878" strokeOpacity="0.18" strokeWidth="1" />
+            </svg>
+            <div className="relative z-10">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full border border-mauve/35 bg-canvas/70 flex items-center justify-center text-mauve">
+                <svg viewBox="0 0 48 48" fill="none" className="w-8 h-8 stroke-current" strokeWidth="1.25">
+                  <path d="M12 16h24l-2 22a3 3 0 01-3 3H17a3 3 0 01-3-3l-2-22z" />
+                  <path d="M18 16v-3a6 6 0 0112 0v3" />
+                  <circle cx="24" cy="27" r="2.5" strokeOpacity="0.6" />
+                </svg>
+              </div>
+              <h2 className="font-display text-lg uppercase tracking-widest text-content mb-2">
+                Tu carrito está vacío
+              </h2>
+              <p className="text-content-secondary text-xs sm:text-sm mb-6 max-w-sm mx-auto leading-relaxed">
+                Explorá nuestra colección de bienestar íntimo, lencería y cosmética sensorial con entrega confidencial en Córdoba.
+              </p>
+              <Link to="/catalogo">
+                <Button variant="primary" size="lg" className="px-6 text-xs sm:text-sm">
+                  <span>Explorar Catálogo</span>
+                  <FiArrowRight className="ml-2 text-xs" />
+                </Button>
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="lg:grid lg:grid-cols-12 lg:gap-x-10 lg:items-start">

@@ -21,6 +21,8 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
   const [formData, setFormData] = useState({
     name: '',
     sku: '',
+    parentCategoryId: '',
+    subcategoryId: '',
     categoryId: '',
     brand: '',
     badge: '',
@@ -53,10 +55,34 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
 
   useEffect(() => {
     if (initialData) {
+      const rawCatId = initialData.categoryId || initialData.category?.id || '';
+      const matchedCat = categories.find((c) => c.id === rawCatId);
+
+      let resolvedParentId = '';
+      let resolvedSubcategoryId = '';
+
+      if (matchedCat) {
+        if (matchedCat.parentId) {
+          resolvedParentId = matchedCat.parentId;
+          resolvedSubcategoryId = matchedCat.id;
+        } else {
+          resolvedParentId = matchedCat.id;
+          resolvedSubcategoryId = '';
+        }
+      } else if (initialData.category?.parentId) {
+        resolvedParentId = initialData.category.parentId;
+        resolvedSubcategoryId = rawCatId;
+      } else {
+        resolvedParentId = rawCatId;
+        resolvedSubcategoryId = '';
+      }
+
       setFormData({
         name: initialData.name || '',
         sku: initialData.sku || '',
-        categoryId: initialData.categoryId || initialData.category?.id || '',
+        parentCategoryId: resolvedParentId,
+        subcategoryId: resolvedSubcategoryId,
+        categoryId: resolvedSubcategoryId || resolvedParentId || '',
         brand: initialData.brand || '',
         badge: initialData.badge || '',
         description: initialData.description || '',
@@ -87,7 +113,9 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
       setFormData({
         name: '',
         sku: '',
-        categoryId: categories[0]?.id || '',
+        parentCategoryId: '',
+        subcategoryId: '',
+        categoryId: '',
         brand: '',
         badge: '',
         description: '',
@@ -104,6 +132,23 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    if (name === 'parentCategoryId') {
+      setFormData((prev) => ({
+        ...prev,
+        parentCategoryId: value,
+        subcategoryId: '',
+        categoryId: value,
+      }));
+      return;
+    }
+    if (name === 'subcategoryId') {
+      setFormData((prev) => ({
+        ...prev,
+        subcategoryId: value,
+        categoryId: value || prev.parentCategoryId,
+      }));
+      return;
+    }
     setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
@@ -202,10 +247,12 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
         ? Math.min(...cleanedVariants.map((v) => v.price))
         : parseFloat(formData.price || 0);
 
+    const finalCategoryId = formData.subcategoryId || formData.parentCategoryId || null;
+
     const payload = {
       name: formData.name.trim(),
       sku: formData.sku ? formData.sku.trim() : null,
-      categoryId: formData.categoryId || null,
+      categoryId: finalCategoryId,
       brand: formData.brand ? formData.brand.trim() : null,
       badge: formData.badge ? formData.badge.trim() : null,
       description: formData.description ? formData.description.trim() : '',
@@ -223,13 +270,30 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
     onSubmit(payload);
   };
 
-  const categoryOptions = [
+  const rootCategories = categories.filter((c) => !c.parentId);
+  const availableSubcategories = formData.parentCategoryId
+    ? categories.filter((c) => c.parentId === formData.parentCategoryId)
+    : [];
+
+  const parentCategoryOptions = [
     { value: '', label: 'Seleccionar categoría...' },
-    ...categories.map((c) => ({
+    ...rootCategories.map((c) => ({
       value: c.id,
-      label: c.parent ? `${c.parent.name} → ${c.name}` : c.name,
+      label: c.name,
     })),
   ];
+
+  const subcategoryOptions = !formData.parentCategoryId
+    ? [{ value: '', label: 'Primero elegí una categoría...' }]
+    : availableSubcategories.length === 0
+      ? [{ value: '', label: 'Sin subcategorías en esta categoría' }]
+      : [
+          { value: '', label: 'Seleccionar subcategoría...' },
+          ...availableSubcategories.map((sub) => ({
+            value: sub.id,
+            label: sub.name,
+          })),
+        ];
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-h-[75vh] overflow-y-auto px-1 pr-2">
@@ -253,14 +317,29 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
         />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
         <Select
-          label="Categoría / Subcategoría"
-          name="categoryId"
-          options={categoryOptions}
-          value={formData.categoryId}
+          label="Categoría *"
+          name="parentCategoryId"
+          required
+          options={parentCategoryOptions}
+          value={formData.parentCategoryId}
           onChange={handleChange}
         />
+        <Select
+          label={
+            availableSubcategories.length > 0 ? 'Subcategoría *' : 'Subcategoría'
+          }
+          name="subcategoryId"
+          required={availableSubcategories.length > 0}
+          disabled={!formData.parentCategoryId || availableSubcategories.length === 0}
+          options={subcategoryOptions}
+          value={formData.subcategoryId}
+          onChange={handleChange}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
         <Input
           label="Marca (Opcional)"
           name="brand"

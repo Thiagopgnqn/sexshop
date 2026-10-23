@@ -6,6 +6,8 @@
   "scripts": {
     "import:catalog": "npm --prefix backend run import:catalog",
     "demo:build-data": "npm --prefix frontend run demo:build-data",
+    "images:build": "npm --prefix frontend run images:build",
+    "images:report": "npm --prefix frontend run images:report",
     "build": "npm --prefix frontend run build",
     "dev:backend": "npm --prefix backend run dev",
     "dev:frontend": "npm --prefix frontend run dev"

@@ -37,8 +37,13 @@ const CartDrawer = ({ isOpen, onClose }) => {
           {/* Cuerpo del Cajón */}
           <div className="flex-1 overflow-y-auto px-5 py-3">
             {items.length === 0 ? (
-              <div className="text-center py-20 px-4">
-                <FiShoppingBag className="mx-auto text-4xl text-mauve/40 mb-3" />
+              <div className="relative overflow-hidden text-center my-8 py-14 px-5 rounded-xl border border-brand-border/20 smoke-card-texture">
+                <div className="w-14 h-14 mx-auto mb-3 rounded-full border border-mauve/35 bg-canvas/70 flex items-center justify-center text-mauve">
+                  <svg viewBox="0 0 48 48" fill="none" className="w-7 h-7 stroke-current" strokeWidth="1.25">
+                    <path d="M12 16h24l-2 22a3 3 0 01-3 3H17a3 3 0 01-3-3l-2-22z" />
+                    <path d="M18 16v-3a6 6 0 0112 0v3" />
+                  </svg>
+                </div>
                 <h3 className="font-display text-base uppercase tracking-wider text-content mb-1">
                   Tu carrito está vacío
                 </h3>

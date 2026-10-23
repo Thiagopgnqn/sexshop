@@ -4,6 +4,7 @@ import Badge from '../ui/Badge';
 import Button from '../ui/Button';
 import ProductPlaceholder from '../ui/ProductPlaceholder';
 import useCart from '../../hooks/useCart';
+import { resolveProductImage } from '../../utils/productImages';
 import { FiShoppingBag, FiArrowRight } from 'react-icons/fi';
 import themeConfig from '../../config/theme';
 
@@ -13,7 +14,8 @@ const ProductCard = ({ product }) => {
   const [imgError, setImgError] = useState(false);
 
   const productId = product.id || product._id;
-  const imageUrl = product.imageUrl || product.image;
+  const resolvedImg = resolveProductImage(product);
+  const imageUrl = resolvedImg?.main || null;
   const activeVariants = Array.isArray(product.variants)
     ? product.variants.filter((v) => v.active !== false)
     : [];
@@ -50,10 +52,15 @@ const ProductCard = ({ product }) => {
           {imageUrl && !imgError ? (
             <img
               src={imageUrl}
-              alt={product.name}
+              srcSet={resolvedImg?.srcSet}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              width="400"
+              height="400"
+              alt={`${product.name} — ${product.category?.name || themeConfig.brand.name}`}
               className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500 ease-out"
               onError={() => setImgError(true)}
               loading="lazy"
+              decoding="async"
             />
           ) : (
             <ProductPlaceholder label={product.category?.name || 'Nocturna'} />

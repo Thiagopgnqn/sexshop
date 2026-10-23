@@ -55,6 +55,37 @@ Si modificás el archivo `catalogo_demo.csv` en la raíz del proyecto, regenerá
 npm run demo:build-data
 ```
 
+---
+
+## Sistema de Imágenes de Productos y Marca
+
+El proyecto incluye un pipeline estático e idempotente para procesar fotografías de productos por código `SKU` sin depender de servicios externos.
+
+### 1. Convención de archivos fuente (`images-source/`)
+- Colocá las fotos originales en `images-source/products/` nombradas exactamente con el **SKU** del producto o de la variante tal como figura en el CSV (por ejemplo: `204.jpg`, `4580.png`, `145R.webp`, `145N.jpg`).
+- Para **galería adicional** de un mismo SKU, agregá sufijos numéricos: `{SKU}-2.jpg`, `{SKU}-3.png`, etc.
+- Para imágenes opcionales de marca, colocalas en `images-source/brand/` (`hero.jpg`, `about.jpg`).
+- La carpeta `images-source/` (excepto sus `.gitkeep`) está en `.gitignore` para no subir archivos crudos pesados al repositorio; en cambio, los WebP optimizados de `frontend/public/images/` y el manifiesto `frontend/src/api/demo/images-manifest.json` **sí se commitean** para que funcionen directamente en Vercel.
+
+### 2. Comandos de procesamiento y reporte
+Desde la raíz del proyecto (o desde `frontend/`):
+
+```bash
+# Optimizar imágenes con sharp (genera {SKU}.webp de 800px, {SKU}-thumb.webp de 400px y images-manifest.json)
+npm run images:build
+
+# Generar el reporte IMAGENES-PENDIENTES.md cruzando catalogo_demo.csv y catalogo_nocturna.csv contra las imágenes cargadas
+npm run images:report
+```
+
+### 3. Regla de resolución en el Frontend
+- El helper `frontend/src/utils/productImages.js` resuelve las imágenes en este orden de prioridad:
+  1. Imagen de la **variante activa** por su `SKU` (permite que al cambiar de variante/color en la ficha del producto cambie la foto automáticamente).
+  2. Imagen base del **producto** por su `SKU` principal.
+  3. Si no existe foto para ese SKU, se renderiza el componente `<ProductPlaceholder />` de marca.
+- En **Modo Demo (`VITE_DEMO_MODE=true`)** se consulta directamente `frontend/src/api/demo/images-manifest.json` (más cualquier imagen subida en caliente desde el panel Admin en `localStorage`).
+- En **Modo Producción Real** se prioriza `imageUrl` (Cloudinary) si el producto la tiene cargada en base de datos, y se usa el manifiesto estático por SKU como respaldo automático.
+
 ### Cómo pasar luego de Modo Demo a Modo Producción Real
 
 Cuando el cliente apruebe la tienda y se despliegue el backend real (`Express + Prisma + PostgreSQL`):

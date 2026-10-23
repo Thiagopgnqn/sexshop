@@ -16,7 +16,7 @@ export const useSEO = ({
   title,
   description,
   keywords,
-  image,
+  image = '/images/brand/og-image.png',
   url,
   type = 'website',
   structuredData,

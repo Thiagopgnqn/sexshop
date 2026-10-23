@@ -29,7 +29,7 @@ const Layout = () => {
   return (
     <div
       className={`min-h-screen flex flex-col bg-canvas text-content selection:bg-brand selection:text-content ${
-        isDemoMode() ? 'pb-12' : ''
+        isDemoMode() ? 'pb-16 sm:pb-12' : ''
       }`}
     >
       <Header />
