@@ -9,9 +9,11 @@ import {
   FiLogOut,
   FiArrowLeft,
   FiX,
+  FiRefreshCw,
 } from 'react-icons/fi';
 import useAuth from '../../hooks/useAuth';
 import Logo from '../ui/Logo';
+import { isDemoMode, resetDemoState } from '../../api/demo/demoAdapter';
 
 const AdminSidebar = ({ isOpen, onClose }) => {
   const { user, logout } = useAuth();
@@ -102,7 +104,7 @@ const AdminSidebar = ({ isOpen, onClose }) => {
           </div>
         </div>
 
-        <div className="p-4 border-t border-brand-border/20 bg-canvas/50">
+        <div className={`p-4 border-t border-brand-border/20 bg-canvas/50 ${isDemoMode() ? 'pb-14' : ''}`}>
           <div className="flex items-center justify-between mb-3 px-1">
             <div className="truncate">
               <p className="text-xs font-medium text-content truncate">
@@ -114,6 +116,17 @@ const AdminSidebar = ({ isOpen, onClose }) => {
               ADMIN
             </span>
           </div>
+
+          {isDemoMode() && (
+            <button
+              type="button"
+              onClick={resetDemoState}
+              className="flex items-center justify-center space-x-2 w-full py-2 px-3 mb-2 rounded-md text-xs font-medium text-content bg-surface-elevated border border-mauve/35 hover:bg-brand transition-colors"
+            >
+              <FiRefreshCw size={12} className="text-mauve" />
+              <span>Restablecer demo</span>
+            </button>
+          )}
 
           <button
             onClick={handleLogout}

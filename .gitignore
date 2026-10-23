@@ -1,18 +1,27 @@
 # Dependencies
 node_modules/
+**/node_modules/
 
-# Environment
+# Environment (exclude all real .env files, keep .env.example templates)
 .env
-.env.local
-.env.*.local
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
 
 # Build output
 frontend/dist/
 backend/dist/
 
-# Database
+# Local Database & Docker volumes
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
 backend/prisma/*.db
 backend/prisma/*.db-journal
+postgres_data/
 
 # Uploads
 backend/uploads/*
@@ -31,4 +40,3 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
-

@@ -1,9 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FiInstagram, FiMail, FiLock, FiMapPin, FiClock } from 'react-icons/fi';
+import { FiInstagram, FiMail, FiLock, FiMapPin, FiClock, FiRefreshCw } from 'react-icons/fi';
 import { FaWhatsapp } from 'react-icons/fa';
 import themeConfig from '../../config/theme';
 import Logo from '../ui/Logo';
+import { isDemoMode, resetDemoState } from '../../api/demo/demoAdapter';
 
 const Footer = () => {
   return (
@@ -207,9 +208,22 @@ const Footer = () => {
               </a>
             </p>
           </div>
-          <p className="text-center md:text-right text-mauve-light">
-            {themeConfig.legal.note}
-          </p>
+          <div className="flex flex-col sm:flex-row items-center gap-3 md:justify-end">
+            {isDemoMode() && (
+              <button
+                type="button"
+                onClick={resetDemoState}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-mauve/40 bg-surface-elevated hover:bg-brand text-content transition-colors text-xs font-medium"
+                title="Borrar datos locales y restablecer el catálogo original de la demo"
+              >
+                <FiRefreshCw size={12} className="text-mauve" />
+                <span>Restablecer demo</span>
+              </button>
+            )}
+            <p className="text-center md:text-right text-mauve-light">
+              {themeConfig.legal.note}
+            </p>
+          </div>
         </div>
       </div>
     </footer>

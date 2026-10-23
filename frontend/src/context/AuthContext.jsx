@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useMemo } from 'react';
 import client from '../api/client';
+import { isDemoMode, loadDemoState } from '../api/demo/demoAdapter';
 
 export const AuthContext = createContext();
 
@@ -9,7 +10,14 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const validateToken = async () => {
-      const token = localStorage.getItem('accessToken');
+      let token = localStorage.getItem('accessToken');
+      if (!token && isDemoMode()) {
+        const demoState = loadDemoState();
+        if (demoState?.session?.accessToken) {
+          token = demoState.session.accessToken;
+          localStorage.setItem('accessToken', token);
+        }
+      }
       if (token) {
         try {
           const res = await client.get('/auth/me');
@@ -31,6 +39,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('refreshToken', res.data.refreshToken);
     }
     setUser(res.data.user);
+    return res.data.user;
   };
 
   const register = async (name, email, password, phone) => {

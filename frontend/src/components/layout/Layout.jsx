@@ -4,7 +4,9 @@ import Header from './Header';
 import Footer from './Footer';
 import AgeGateModal, { isAgeVerifiedInStorage } from './AgeGateModal';
 import ErrorBoundary from './ErrorBoundary';
+import DemoBanner from './DemoBanner';
 import { initMetaPixel } from '../../utils/metaPixel';
+import { isDemoMode } from '../../api/demo/demoAdapter';
 
 const Layout = () => {
   const [ageVerified, setAgeVerified] = useState(() => isAgeVerifiedInStorage());
@@ -25,7 +27,11 @@ const Layout = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-canvas text-content selection:bg-brand selection:text-content">
+    <div
+      className={`min-h-screen flex flex-col bg-canvas text-content selection:bg-brand selection:text-content ${
+        isDemoMode() ? 'pb-12' : ''
+      }`}
+    >
       <Header />
       <main className="flex-grow">
         <ErrorBoundary resetKey={location.pathname + location.search}>
@@ -33,6 +39,7 @@ const Layout = () => {
         </ErrorBoundary>
       </main>
       <Footer />
+      <DemoBanner />
     </div>
   );
 };

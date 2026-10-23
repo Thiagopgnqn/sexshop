@@ -3,6 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
+import {
+  isDemoMode,
+  DEMO_ADMIN_EMAIL,
+  DEMO_ADMIN_PASSWORD,
+} from '../../api/demo/demoAdapter';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
@@ -17,8 +22,8 @@ const LoginForm = () => {
     setError('');
     setLoading(true);
     try {
-      await login(email, password);
-      navigate('/');
+      const loggedUser = await login(email, password);
+      navigate(loggedUser?.role === 'ADMIN' ? '/admin' : '/');
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -30,8 +35,32 @@ const LoginForm = () => {
     }
   };
 
+  const handleFillDemoAdmin = () => {
+    setEmail(DEMO_ADMIN_EMAIL);
+    setPassword(DEMO_ADMIN_PASSWORD);
+    setError('');
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {isDemoMode() && (
+        <div className="p-3 rounded-md bg-surface-elevated border border-mauve/35 text-xs space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-medium text-content">Acceso Admin de Demostración</span>
+            <button
+              type="button"
+              onClick={handleFillDemoAdmin}
+              className="text-[11px] px-2 py-0.5 rounded bg-brand text-content border border-mauve/40 hover:bg-brand/80 transition-colors font-medium"
+            >
+              Autocompletar
+            </button>
+          </div>
+          <p className="text-[11px] text-content-secondary font-mono">
+            {DEMO_ADMIN_EMAIL} / {DEMO_ADMIN_PASSWORD}
+          </p>
+        </div>
+      )}
+
       <Input
         label="Correo Electrónico"
         type="email"

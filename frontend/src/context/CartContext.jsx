@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 import Toast from '../components/ui/Toast';
 import { trackAddToCart } from '../utils/metaPixel';
+import { isDemoMode, loadDemoState, saveDemoState } from '../api/demo/demoAdapter';
 
 export const CartContext = createContext();
 
@@ -23,6 +24,12 @@ export const getCartItemKey = (productId, variantId = null) =>
 export const CartProvider = ({ children }) => {
   const [items, setItems] = useState(() => {
     try {
+      if (isDemoMode()) {
+        const demoState = loadDemoState();
+        if (Array.isArray(demoState?.cart) && demoState.cart.length > 0) {
+          return demoState.cart;
+        }
+      }
       const saved = localStorage.getItem('nocturna_cart');
       return saved ? JSON.parse(saved) : [];
     } catch {
@@ -33,6 +40,11 @@ export const CartProvider = ({ children }) => {
   useEffect(() => {
     try {
       localStorage.setItem('nocturna_cart', JSON.stringify(items));
+      if (isDemoMode()) {
+        const demoState = loadDemoState();
+        demoState.cart = items;
+        saveDemoState(demoState);
+      }
     } catch {
       // Ignore storage quota errors
     }

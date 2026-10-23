@@ -10,7 +10,7 @@ import { FaWhatsapp } from 'react-icons/fa';
 import { FiCheckCircle, FiLock, FiShield, FiTruck, FiMapPin } from 'react-icons/fi';
 import themeConfig from '../../config/theme';
 
-const CheckoutForm = () => {
+const CheckoutForm = ({ onOrderSuccess }) => {
   const { items, cartTotal, clearCart } = useCart();
   const { user } = useAuth();
 
@@ -116,8 +116,11 @@ const CheckoutForm = () => {
         window.open(link, '_blank');
       }
 
-      clearCart();
+      if (onOrderSuccess) {
+        onOrderSuccess();
+      }
       setSuccess(true);
+      clearCart();
     } catch (err) {
       const errorMsg =
         err.response?.data?.error ||

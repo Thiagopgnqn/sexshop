@@ -7,11 +7,14 @@
  * 3. Únicamente se envían identificadores (SKU o ID) en content_ids, content_type, value, currency y num_items.
  */
 
+import { isDemoMode } from '../api/demo/demoAdapter';
+
 const PIXEL_ID = (import.meta.env.VITE_META_PIXEL_ID || '').trim();
 let initialized = false;
 
 export const initMetaPixel = () => {
-  if (!PIXEL_ID || typeof window === 'undefined' || initialized) return;
+  // En modo demo NO se carga el Píxel ni se emiten eventos a Meta
+  if (isDemoMode() || !PIXEL_ID || typeof window === 'undefined' || initialized) return;
   initialized = true;
 
   /* eslint-disable */
@@ -38,7 +41,7 @@ export const initMetaPixel = () => {
 };
 
 const safeTrack = (eventName, params) => {
-  if (!PIXEL_ID || typeof window === 'undefined' || typeof window.fbq !== 'function') {
+  if (isDemoMode() || !PIXEL_ID || typeof window === 'undefined' || typeof window.fbq !== 'function') {
     return;
   }
   window.fbq('track', eventName, params);

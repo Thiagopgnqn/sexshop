@@ -11,6 +11,7 @@ import useSEO from '../hooks/useSEO';
 
 const CheckoutPage = () => {
   const { items, cartTotal, cartCount } = useCart();
+  const [orderCompleted, setOrderCompleted] = React.useState(false);
   const navigate = useNavigate();
 
   useSEO({
@@ -19,14 +20,16 @@ const CheckoutPage = () => {
   });
 
   useEffect(() => {
-    if (items.length === 0) {
+    if (items.length === 0 && !orderCompleted) {
       navigate('/carrito');
       return;
     }
-    trackInitiateCheckout({ items, total: cartTotal });
-  }, [items.length, navigate]);
+    if (items.length > 0) {
+      trackInitiateCheckout({ items, total: cartTotal });
+    }
+  }, [items.length, orderCompleted, navigate]);
 
-  if (items.length === 0) return null;
+  if (items.length === 0 && !orderCompleted) return null;
 
   return (
     <div className="bg-canvas min-h-screen py-10 sm:py-14">
@@ -51,11 +54,12 @@ const CheckoutPage = () => {
 
         <div className="lg:grid lg:grid-cols-12 lg:gap-x-10 lg:items-start">
           {/* Formulario de Checkout */}
-          <div className="lg:col-span-7">
-            <CheckoutForm />
+          <div className={orderCompleted ? 'lg:col-span-12 max-w-xl mx-auto w-full' : 'lg:col-span-7'}>
+            <CheckoutForm onOrderSuccess={() => setOrderCompleted(true)} />
           </div>
 
           {/* Resumen de la Orden */}
+          {!orderCompleted && (
           <div className="lg:col-span-5 mt-8 lg:mt-0">
             <div className="bg-surface rounded-lg p-6 sm:p-7 border border-brand-border/20 sticky top-24">
               <div className="pb-3 mb-4 border-b border-brand-border/15">
@@ -144,6 +148,7 @@ const CheckoutPage = () => {
               </div>
             </div>
           </div>
+          )}
         </div>
       </div>
     </div>

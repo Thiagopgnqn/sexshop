@@ -1,0 +1,68 @@
+grupo,categoria,subcategoria,nombre,descripcion,sku,variante_tipo,variante_talle,variante_color,variante_sabor_aroma,variante_volumen_medida,precio_ars,estado,nota
+Baby Doll Venecia,Lencería,Baby dolls,Baby Doll Venecia,Confeccionado en tela microtul con terminaciones de puntilla,4580,,,,,,32000,ok,Descripción tomada de la nota del catálogo (inferida para este grupo)
+Baby Doll Rose,Lencería,Baby dolls,Baby Doll Rose,,221,,,,,,26000,ok,
+Vestido Vinilo Verona,Lencería,Vestidos,Vestido Vinilo Verona,,4510,,,,,,39500,ok,
+Body Marley,Lencería,Bodys,Body Marley Rojo,,145R,,,Rojo,,,16000,ok,
+Body Marley,Lencería,Bodys,Body Marley Negro,,145N,,,Negro,,,16000,ok,
+Conjunto Hera,Lencería,Conjuntos,Conjunto Hera,,503,,,,,,24000,ok,
+Liguero Pandora,Lencería,"Ligueros, arneses y máscaras",Liguero Pandora,,128,,,,,,16000,ok,
+Zunga,Línea masculina,,Zunga,,184,,,,,,17000,ok,
+Fantasía Enfermera Pasionel,Fantasías,Línea Pasionel,Fantasía Enfermera Pasionel,,P002,,,,,,42000,ok,
+Fantasía Conejita Pasionel,Fantasías,Línea Pasionel,Fantasía Conejita Pasionel,,P012,,,,,,42000,ok,
+Fantasía Colegiala FT (FT.03),Fantasías,Línea Free Size,Fantasía Colegiala FT Negra,,FT.03-NEGRA,,,Negra,,,28000,ok,SKU derivado del código + color
+Fantasía Colegiala FT (FT.03),Fantasías,Línea Free Size,Fantasía Colegiala FT Blanca,,FT.03-BLANCA,,,Blanca,,,28000,ok,SKU derivado del código + color
+Catsuit Colegiala,Fantasías,Línea Free Size,Catsuit Colegiala (3),,Cat.03,Modelo 3,,,,,18000,ok,
+Catsuit Colegiala,Fantasías,Línea Free Size,Catsuit Colegiala (4),,Cat.04,Modelo 4,,,,,18000,ok,
+Gel Natural,Cosmética íntima,Geles y lubricantes,Gel Natural,,Art.611,,,,,80 ml,13000,ok,
+Gel Natural,Cosmética íntima,Geles y lubricantes,Gel Natural,,Art.627,,,,,200 ml,18000,ok,
+Gel Efecto Calor,Cosmética íntima,Geles y lubricantes,Gel Efecto Calor,,Art.621,,,,,80 ml,13000,ok,
+Vela de masaje 30 g,Cosmética íntima,Velas y cremas de masaje,Vela de masaje 30 g,,D63,,,,BE,30 g,12000,ok,
+Vela de masaje 30 g,Cosmética íntima,Velas y cremas de masaje,Vela de masaje 30 g,,D659,,,,Frutos Rojos,30 g,12000,ok,
+Vela de masaje 30 g,Cosmética íntima,Velas y cremas de masaje,Vela de masaje 30 g,,D62,,,,Latte Capuccino y Dulce de Leche,30 g,12000,ok,
+Vela de masaje 30 g,Cosmética íntima,Velas y cremas de masaje,Vela de masaje 30 g,,D64,,,,Body Soufflé Mango y Maracuyá,30 g,12000,ok,
+Vela de masaje 30 g,Cosmética íntima,Velas y cremas de masaje,Vela de masaje 30 g,,D659-MYHEMP,,,,My Hemp,30 g,12000,ok,Código D659 repetido con Frutos Rojos
+Vela de masaje 30 g,Cosmética íntima,Velas y cremas de masaje,Vela de masaje 30 g,,D61,,,,Champagne Rose,30 g,12000,ok,
+Vela de masaje 30 g,Cosmética íntima,Velas y cremas de masaje,Vela de masaje 30 g,,D58,,,,Crazy Girl,30 g,12000,ok,
+Vela de masaje 30 g,Cosmética íntima,Velas y cremas de masaje,Vela de masaje 30 g,,D51,,,,Sweet Beauty Rush Caramel Strawberries,30 g,12000,ok,
+Vela de masaje 30 g,Cosmética íntima,Velas y cremas de masaje,Vela de masaje 30 g,,D55,,,,Body Soufflé Strawberries,30 g,12000,ok,
+Vela de masaje 30 g,Cosmética íntima,Velas y cremas de masaje,Vela de masaje 30 g,,MMA01,,,,Mon Amour,30 g,12000,ok,
+Vela de masaje 30 g,Cosmética íntima,Velas y cremas de masaje,Vela de masaje 30 g,,CT01,,,,Desire Coconut,30 g,12000,ok,
+Vela de masaje 30 g,Cosmética íntima,Velas y cremas de masaje,Vela de masaje 30 g,,,,,,Sweet Beauty Rush Vainilla Coconut,30 g,12000,ok,Sin código ni precio propio en el catálogo; precio asumido igual al resto
+Aceite comestible Love Potion,Cosmética íntima,Aceites comestibles y de masaje,Aceite comestible Love Potion,,A27,,,,Algodón de azúcar,30 ml,13000,ok,
+Aceite comestible Love Potion,Cosmética íntima,Aceites comestibles y de masaje,Aceite comestible Love Potion,,A28,,,,Banana,30 ml,13000,ok,
+Aceite comestible Love Potion,Cosmética íntima,Aceites comestibles y de masaje,Aceite comestible Love Potion,,A26,,,,Frutilla,30 ml,13000,ok,Código A26 inferido para Frutilla; confirmar
+Aceite comestible Love Potion,Cosmética íntima,Aceites comestibles y de masaje,Aceite comestible Love Potion,,A01,,,,Chocolate,30 ml,13000,ok,
+Aceite comestible Love Potion,Cosmética íntima,Aceites comestibles y de masaje,Aceite comestible Love Potion,,A03,,,,Frutos rojos,30 ml,13000,ok,
+Aceite comestible Love Potion,Cosmética íntima,Aceites comestibles y de masaje,Aceite comestible Love Potion,,A04,,,,Dulce de leche,30 ml,13000,ok,
+Aceite comestible Love Potion,Cosmética íntima,Aceites comestibles y de masaje,Aceite comestible Love Potion,,A06,,,,Champagne,30 ml,13000,ok,
+Aceite comestible Love Potion,Cosmética íntima,Aceites comestibles y de masaje,Aceite comestible Love Potion,,A24,,,,Mint Cream,30 ml,13000,ok,
+Crema corporal para masaje,Cosmética íntima,Velas y cremas de masaje,Crema corporal para masaje,,,,,,BE,,18000,ok,
+Crema corporal para masaje,Cosmética íntima,Velas y cremas de masaje,Crema corporal para masaje,,,,,,Coconut,,18000,ok,
+Gel íntimo Sens Bomb,Cosmética íntima,Geles y lubricantes,Gel íntimo Sens Bomb,,S01,,,,Maca,,12000,ok,
+Gel íntimo Sens Bomb,Cosmética íntima,Geles y lubricantes,Gel íntimo Sens Bomb,,S02,,,,Sándalo Rojo,,12000,ok,
+Perfume Hot Inevitable,Perfumes y feromonas,Perfumes,Perfume Hot Inevitable,,CV01-1,,,,Privée,100 ml,37000,ok,
+Perfume Hot Inevitable,Perfumes y feromonas,Perfumes,Perfume Hot Inevitable,,C01,,,,So Excited,100 ml,37000,ok,
+Perfume Hot Inevitable,Perfumes y feromonas,Perfumes,Perfume Hot Inevitable,,C02,,,,Con feromonas,100 ml,37000,ok,SKU C02 repetido con Body Splash Hot Inevitable
+Perfume Petit Mort,Perfumes y feromonas,Perfumes,Perfume Petit Mort,,PM03,,,,,50 ml,32000,ok,
+Perfume IT Femme,Perfumes y feromonas,Perfumes,Perfume IT Femme,,IT01,,,,Clásico,50 ml,30000,ok,
+Perfume IT Femme,Perfumes y feromonas,Perfumes,Perfume IT Femme,,IT02,,,,Florale Aphrodisiac,50 ml,30000,ok,
+Jenga Sex,Juegos,Juegos de mesa y otros,Jenga Sex,,JS,,,,,,24000,ok,
+Naipe Kamasutra,Juegos,Dados y cartas,Naipe Kamasutra,,,,,,,,15000,ok,
+Anillo Jelly,Anillos y estimuladores,,Anillo Jelly,,AN01,,,,,,6000,ok,
+Torito Vibrador,Anillos y estimuladores,,Torito Vibrador,,AN4,,,,,,26000,ok,
+Esposas,BDSM y arneses,Esposas,Esposas,,BDSM9,Fina,,,,,17000,ok,
+Esposas,BDSM y arneses,Esposas,Esposas,,BDSM10,Mediana,,,,,19000,ok,
+Esposas,BDSM y arneses,Esposas,Esposas,,BDSM11,Ancha,,,,,22000,ok,
+Esposas,BDSM y arneses,Esposas,Esposas,,BDSM4,Cadena larga,,,,,26000,ok,
+Esposas,BDSM y arneses,Esposas,Esposas,,,Metal con peluche,,,,,16000,ok,
+Esposas,BDSM y arneses,Esposas,Esposas,,,Cuero con peluche,,,,,17000,ok,
+Antifaz Ciego,BDSM y arneses,Mordazas y antifaces,Antifaz Ciego,,BDSM12,,,,,,11000,ok,
+Fusta,BDSM y arneses,Látigos y fustas,Fusta,,BDSM5,Clásica,,,,,19000,ok,
+Fusta,BDSM y arneses,Látigos y fustas,Fusta,,BDSM6,Peluche,,,,,22000,ok,
+Kit negro,BDSM y arneses,Kits y accesorios,Kit negro,,,4 piezas,,,,,29000,ok,
+Kit negro,BDSM y arneses,Kits y accesorios,Kit negro,,BDSM7,11 piezas,,,,,44000,ok,
+Safary,"Dilatadores, consoladores y vibradores",Dilatadores y consoladores anales,Safary,,420,Estándar,,,,16 x 3 cm,20000,ok,
+Safary,"Dilatadores, consoladores y vibradores",Dilatadores y consoladores anales,Safary,,421,SCV,,,,16 x 3 cm,27000,ok,"SCV: sigla del catálogo, confirmar significado"
+Safary,"Dilatadores, consoladores y vibradores",Dilatadores y consoladores anales,Safary,,422,Completo SCV,,,,16 x 3 cm,29000,ok,"SCV: sigla del catálogo, confirmar significado"
+Escorpión,"Dilatadores, consoladores y vibradores",Dilatadores y consoladores anales,Escorpión,,403-C,Consolador,,,,8 x 2 cm,16000,ok,Interpretación del formato del catálogo (Consolador / Vibrador); confirmar con el cliente
+Escorpión,"Dilatadores, consoladores y vibradores",Dilatadores y consoladores anales,Escorpión,,403-V,Vibrador,,,,8 x 2 cm,27000,ok,Interpretación del formato del catálogo (Consolador / Vibrador); confirmar con el cliente

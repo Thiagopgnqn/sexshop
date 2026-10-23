@@ -3,10 +3,12 @@ import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import useAuth from './hooks/useAuth';
-import { FiMenu, FiExternalLink, FiLogOut } from 'react-icons/fi';
+import { FiMenu, FiExternalLink, FiLogOut, FiRefreshCw } from 'react-icons/fi';
 
 import Layout from './components/layout/Layout';
+import DemoBanner from './components/layout/DemoBanner';
 import AdminSidebar from './components/admin/AdminSidebar';
+import { isDemoMode, resetDemoState } from './api/demo/demoAdapter';
 
 import HomePage from './pages/HomePage';
 import CatalogPage from './pages/CatalogPage';
@@ -63,6 +65,18 @@ const ProtectedAdminRoute = ({ children }) => {
           </div>
 
           <div className="flex items-center space-x-2 sm:space-x-3">
+            {isDemoMode() && (
+              <button
+                type="button"
+                onClick={resetDemoState}
+                className="inline-flex items-center space-x-1.5 text-xs font-medium text-content border border-mauve/40 bg-surface-elevated hover:bg-brand px-3 py-1.5 rounded-md transition-colors"
+                title="Borrar cambios locales y restaurar datos originales de la demo"
+              >
+                <FiRefreshCw size={13} className="text-mauve" />
+                <span>Restablecer demo</span>
+              </button>
+            )}
+
             <Link
               to="/"
               className="inline-flex items-center space-x-1.5 text-xs font-medium text-content-secondary hover:text-content border border-brand-border/30 hover:bg-surface-elevated px-3 py-1.5 rounded-md transition-colors"
@@ -83,10 +97,11 @@ const ProtectedAdminRoute = ({ children }) => {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-4 sm:p-8 overflow-y-auto bg-canvas">
+        <main className={`flex-1 p-4 sm:p-8 overflow-y-auto bg-canvas ${isDemoMode() ? 'pb-16' : ''}`}>
           <div className="max-w-7xl mx-auto">{children}</div>
         </main>
       </div>
+      <DemoBanner />
     </div>
   );
 };
