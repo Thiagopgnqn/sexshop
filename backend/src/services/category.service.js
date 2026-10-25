@@ -119,7 +119,20 @@ export const getCategories = async ({ flat = false } = {}) => {
     };
   });
 
-  return flat ? allWithCounts : allWithCounts.filter((c) => !c.parentId);
+  if (flat) {
+    const flatMap = new Map();
+    for (const c of allWithCounts) {
+      flatMap.set(c.id, c);
+      for (const sub of c.children || []) {
+        if (!flatMap.has(sub.id)) {
+          flatMap.set(sub.id, { ...sub, parentId: sub.parentId || c.id });
+        }
+      }
+    }
+    return Array.from(flatMap.values());
+  }
+
+  return allWithCounts.filter((c) => !c.parentId);
 };
 
 export const createCategory = async ({ name, slug, parentId = null, order = 0 }) => {

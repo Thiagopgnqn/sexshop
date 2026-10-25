@@ -24,4 +24,5 @@ export const createOrderSchema = z.object({
 
 export const updateOrderStatusSchema = z.object({
   status: z.enum(['PENDING', 'CONFIRMED', 'DELIVERED', 'CANCELLED']),
+  adminNotes: z.string().optional(),
 });

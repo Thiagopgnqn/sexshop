@@ -21,6 +21,7 @@ export const createProductSchema = z.object({
   sku: z.string().trim().optional().nullable(),
   categoryId: z.string().trim().optional().nullable(),
   badge: z.string().trim().optional().nullable(),
+  featured: z.boolean().optional(),
   brand: z.string().trim().optional().nullable(),
   imageUrl: z.string().trim().optional().nullable(),
   description: z.string().optional().nullable().default(''),

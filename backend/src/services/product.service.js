@@ -457,70 +457,98 @@ export const createProduct = async (data) => {
 export const updateProduct = async (id, data) => {
   const { variants, ...productData } = data;
 
-  return prisma.$transaction(async (tx) => {
-    const updatePayload = { ...productData };
-    if ('sku' in updatePayload) updatePayload.sku = updatePayload.sku || null;
-    if ('categoryId' in updatePayload) updatePayload.categoryId = updatePayload.categoryId || null;
-    if ('imageUrl' in updatePayload) updatePayload.imageUrl = updatePayload.imageUrl || null;
-    if ('badge' in updatePayload) updatePayload.badge = updatePayload.badge || null;
-    if ('brand' in updatePayload) updatePayload.brand = updatePayload.brand || null;
+  try {
+    if (Date.now() < dbDownUntil) throw new Error('DB_DOWN_CACHED');
+    return await prisma.$transaction(async (tx) => {
+      const updatePayload = { ...productData };
+      delete updatePayload.featured;
+      if ('sku' in updatePayload) updatePayload.sku = updatePayload.sku || null;
+      if ('categoryId' in updatePayload) updatePayload.categoryId = updatePayload.categoryId || null;
+      if ('imageUrl' in updatePayload) updatePayload.imageUrl = updatePayload.imageUrl || null;
+      if ('badge' in updatePayload) updatePayload.badge = updatePayload.badge || null;
+      if ('brand' in updatePayload) updatePayload.brand = updatePayload.brand || null;
 
-    if (Array.isArray(variants)) {
-      if (variants.length > 0) {
-        const validPrices = variants
-          .map((v) => Number(v.price))
-          .filter((p) => Number.isFinite(p) && p > 0);
-        if (validPrices.length > 0) {
-          updatePayload.price = Math.min(...validPrices);
+      if (Array.isArray(variants)) {
+        if (variants.length > 0) {
+          const validPrices = variants
+            .map((v) => Number(v.price))
+            .filter((p) => Number.isFinite(p) && p > 0);
+          if (validPrices.length > 0) {
+            updatePayload.price = Math.min(...validPrices);
+          }
+          updatePayload.stock = variants.reduce((sum, v) => sum + (Number(v.stock) || 0), 0);
         }
-        updatePayload.stock = variants.reduce((sum, v) => sum + (Number(v.stock) || 0), 0);
+
+        const existingVariants = await tx.productVariant.findMany({
+          where: { productId: id },
+        });
+        const existingBySku = new Map(existingVariants.map((ev) => [ev.sku, ev]));
+        const incomingIds = new Set(
+          variants
+            .map((v) => v.id || existingBySku.get(v.sku?.trim())?.id)
+            .filter(Boolean)
+        );
+
+        for (const existing of existingVariants) {
+          if (!incomingIds.has(existing.id)) {
+            await tx.productVariant.delete({ where: { id: existing.id } }).catch(() => {});
+          }
+        }
+
+        for (const v of variants) {
+          const matchedId = v.id || existingBySku.get(v.sku?.trim())?.id;
+          const vData = {
+            sku: v.sku.trim(),
+            type: v.type || null,
+            size: v.size || null,
+            color: v.color || null,
+            flavor: v.flavor || null,
+            volume: v.volume || null,
+            price: v.price,
+            stock: v.stock ?? 0,
+            active: v.active ?? true,
+          };
+          if (matchedId) {
+            await tx.productVariant.update({
+              where: { id: matchedId },
+              data: vData,
+            });
+          } else {
+            await tx.productVariant.create({
+              data: {
+                ...vData,
+                productId: id,
+              },
+            });
+          }
+        }
       }
 
-      const existingVariants = await tx.productVariant.findMany({
-        where: { productId: id },
+      return tx.product.update({
+        where: { id },
+        data: updatePayload,
+        include: productInclude,
       });
-      const incomingIds = new Set(variants.filter((v) => v.id).map((v) => v.id));
-
-      for (const existing of existingVariants) {
-        if (!incomingIds.has(existing.id)) {
-          await tx.productVariant.delete({ where: { id: existing.id } });
-        }
-      }
-
-      for (const v of variants) {
-        const vData = {
-          sku: v.sku.trim(),
-          type: v.type || null,
-          size: v.size || null,
-          color: v.color || null,
-          flavor: v.flavor || null,
-          volume: v.volume || null,
-          price: v.price,
-          stock: v.stock ?? 0,
-          active: v.active ?? true,
-        };
-        if (v.id) {
-          await tx.productVariant.update({
-            where: { id: v.id },
-            data: vData,
-          });
-        } else {
-          await tx.productVariant.create({
-            data: {
-              ...vData,
-              productId: id,
-            },
-          });
-        }
-      }
-    }
-
-    return tx.product.update({
-      where: { id },
-      data: updatePayload,
-      include: productInclude,
     });
-  });
+  } catch (err) {
+    dbDownUntil = Date.now() + 60000;
+    const snap = loadSnapshot();
+    const idx = snap.products.findIndex((p) => p.id === id);
+    if (idx === -1) throw new Error('Product not found');
+    const current = snap.products[idx];
+    const updated = {
+      ...current,
+      ...productData,
+      ...(Array.isArray(variants) ? { variants } : {}),
+    };
+    snap.products[idx] = updated;
+    try {
+      fs.writeFileSync(snapshotPath, JSON.stringify(snap, null, 2), 'utf-8');
+    } catch {
+      // ignore write errors
+    }
+    return updated;
+  }
 };
 
 export const deleteProduct = async (id) => {

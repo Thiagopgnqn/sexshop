@@ -22,6 +22,131 @@ const slugify = (text = '') =>
 
 const clone = (obj) => JSON.parse(JSON.stringify(obj));
 
+const buildSampleOrders = (products = []) => {
+  const p1 = products[0];
+  const p2 = products[1] || p1;
+  const p3 = products[2] || p1;
+  const p4 = products[3] || p1;
+  if (!p1) return [];
+
+  return [
+    {
+      id: 'demo_ord_0001',
+      customerName: 'Valentina Gómez (Ejemplo Demo)',
+      customerEmail: 'valentina@ejemplo.com',
+      customerPhone: '351 555 0192',
+      customerAddress: 'Av. Hipólito Yrigoyen 450, Nueva Córdoba, CP 5000, Córdoba',
+      customerProvince: 'Córdoba',
+      customerCity: 'Córdoba Capital',
+      customerPostalCode: '5000',
+      deliveryMethod: 'SHIPPING',
+      comments: 'Entregar en recepción en sobre cerrado sin logos.',
+      status: 'PENDING',
+      total: Number(p1.price || 32000),
+      createdAt: new Date(Date.now() - 3600000 * 2).toISOString(), // Hoy (hace 2 horas)
+      items: [
+        {
+          id: 'demo_ord_item_1',
+          productId: p1.id,
+          variantId: null,
+          variantDescription: null,
+          quantity: 1,
+          price: Number(p1.price || 32000),
+          product: { id: p1.id, name: p1.name, sku: p1.sku, price: p1.price },
+        },
+      ],
+    },
+    {
+      id: 'demo_ord_0002',
+      customerName: 'Camila Rodríguez',
+      customerEmail: 'camila.r@ejemplo.com',
+      customerPhone: '351 618 4420',
+      customerAddress: 'Bv. San Juan 820, Güemes, Córdoba',
+      customerProvince: 'Córdoba',
+      customerCity: 'Córdoba Capital',
+      customerPostalCode: '5000',
+      deliveryMethod: 'SHIPPING',
+      comments: 'Timbre 4B, paquete discreto.',
+      status: 'CONFIRMED',
+      adminNotes: 'Abonó por transferencia MercadoPago',
+      total: Number(p2.price || 28000) * 2,
+      createdAt: new Date(Date.now() - 86400000 * 3).toISOString(), // Esta semana (hace 3 días)
+      items: [
+        {
+          id: 'demo_ord_item_2',
+          productId: p2.id,
+          variantId: null,
+          variantDescription: null,
+          quantity: 2,
+          price: Number(p2.price || 28000),
+          product: { id: p2.id, name: p2.name, sku: p2.sku, price: p2.price },
+        },
+      ],
+    },
+    {
+      id: 'demo_ord_0003',
+      customerName: 'Lucía Fernández',
+      customerEmail: 'lucia.f@ejemplo.com',
+      customerPhone: '351 492 8810',
+      customerAddress: 'Retiro acordado por punto de entrega',
+      customerProvince: 'Córdoba',
+      customerCity: 'Córdoba Capital',
+      customerPostalCode: '5000',
+      deliveryMethod: 'PICKUP',
+      comments: 'Pasa a retirar por la tarde.',
+      status: 'DELIVERED',
+      total: Number(p3.price || 39500) + Number(p1.price || 32000),
+      createdAt: new Date(Date.now() - 86400000 * 16).toISOString(), // Este mes (hace 16 días)
+      items: [
+        {
+          id: 'demo_ord_item_3a',
+          productId: p3.id,
+          variantId: null,
+          variantDescription: null,
+          quantity: 1,
+          price: Number(p3.price || 39500),
+          product: { id: p3.id, name: p3.name, sku: p3.sku, price: p3.price },
+        },
+        {
+          id: 'demo_ord_item_3b',
+          productId: p1.id,
+          variantId: null,
+          variantDescription: null,
+          quantity: 1,
+          price: Number(p1.price || 32000),
+          product: { id: p1.id, name: p1.name, sku: p1.sku, price: p1.price },
+        },
+      ],
+    },
+    {
+      id: 'demo_ord_0004',
+      customerName: 'Martina Sosa',
+      customerEmail: 'martina.s@ejemplo.com',
+      customerPhone: '351 701 3391',
+      customerAddress: 'Recta Martinolli 6100, Argüello, Córdoba',
+      customerProvince: 'Córdoba',
+      customerCity: 'Córdoba Capital',
+      customerPostalCode: '5021',
+      deliveryMethod: 'SHIPPING',
+      comments: '',
+      status: 'DELIVERED',
+      total: Number(p4.price || 16000) * 3,
+      createdAt: new Date(Date.now() - 86400000 * 55).toISOString(), // Este año (hace 55 días)
+      items: [
+        {
+          id: 'demo_ord_item_4',
+          productId: p4.id,
+          variantId: null,
+          variantDescription: null,
+          quantity: 3,
+          price: Number(p4.price || 16000),
+          product: { id: p4.id, name: p4.name, sku: p4.sku, price: p4.price },
+        },
+      ],
+    },
+  ];
+};
+
 const createInitialState = () => {
   const categories = clone(demoSeedData.categories || []);
   const products = clone(demoSeedData.products || []);
@@ -37,45 +162,10 @@ const createInitialState = () => {
     },
   ];
 
-  const sampleProduct = products[0];
-  const orders = sampleProduct
-    ? [
-        {
-          id: 'demo_ord_0001',
-          customerName: 'Valentina Gómez (Ejemplo Demo)',
-          customerEmail: 'valentina@ejemplo.com',
-          customerPhone: '351 555 0192',
-          customerAddress: 'Av. Hipólito Yrigoyen 450, Nueva Córdoba, CP 5000, Córdoba',
-          customerProvince: 'Córdoba',
-          customerCity: 'Córdoba Capital',
-          customerPostalCode: '5000',
-          deliveryMethod: 'DELIVERY',
-          comments: 'Entregar en recepción en sobre cerrado sin logos.',
-          status: 'PENDING',
-          total: Number(sampleProduct.price || 32000),
-          createdAt: new Date(Date.now() - 3600000 * 3).toISOString(),
-          items: [
-            {
-              id: 'demo_ord_item_1',
-              productId: sampleProduct.id,
-              variantId: null,
-              variantDescription: null,
-              quantity: 1,
-              price: Number(sampleProduct.price || 32000),
-              product: {
-                id: sampleProduct.id,
-                name: sampleProduct.name,
-                sku: sampleProduct.sku,
-                price: sampleProduct.price,
-              },
-            },
-          ],
-        },
-      ]
-    : [];
+  const orders = buildSampleOrders(products);
 
   return {
-    version: 1,
+    version: 2,
     initializedAt: new Date().toISOString(),
     categories,
     products,
@@ -93,6 +183,15 @@ export const loadDemoState = () => {
       const parsed = JSON.parse(raw);
       if (parsed && Array.isArray(parsed.products) && Array.isArray(parsed.categories)) {
         if (!Array.isArray(parsed.cart)) parsed.cart = [];
+        // Upgrade older demo state that only had 1 sample order so period filters have rich data
+        if (
+          Array.isArray(parsed.orders) &&
+          parsed.orders.length === 1 &&
+          parsed.orders[0]?.id === 'demo_ord_0001'
+        ) {
+          parsed.orders = buildSampleOrders(parsed.products);
+          saveDemoState(parsed);
+        }
         return parsed;
       }
     }
@@ -784,7 +883,9 @@ export const demoAxiosAdapter = async (config) => {
       imageUrl: body.imageUrl !== undefined ? body.imageUrl : current.imageUrl,
       badge: body.badge !== undefined ? body.badge : current.badge,
       featured:
-        body.badge === 'Destacado'
+        body.featured !== undefined
+          ? Boolean(body.featured)
+          : body.badge === 'Destacado'
           ? true
           : body.badge === null
           ? false
@@ -945,7 +1046,12 @@ export const demoAxiosAdapter = async (config) => {
       }
     }
 
-    order.status = nextStatus;
+    if (body.status !== undefined) {
+      order.status = nextStatus;
+    }
+    if (body.adminNotes !== undefined) {
+      order.adminNotes = String(body.adminNotes || '').trim();
+    }
     saveDemoState(state);
     return makeResponse(config, 200, order);
   }

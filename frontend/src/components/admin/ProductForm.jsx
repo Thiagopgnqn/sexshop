@@ -3,21 +3,83 @@ import Input from '../ui/Input';
 import Select from '../ui/Select';
 import Button from '../ui/Button';
 import client from '../../api/client';
+import { resolveProductImage } from '../../utils/productImages';
 import { FiUploadCloud, FiTrash2, FiRefreshCw, FiLink, FiPlus } from 'react-icons/fi';
 
-const emptyVariant = () => ({
+const emptyVariant = (defaultPrice = '') => ({
   sku: '',
   type: '',
   size: '',
   color: '',
   flavor: '',
   volume: '',
-  price: '',
+  price: defaultPrice,
   stock: 0,
   active: true,
 });
 
-const ProductForm = ({ initialData, onSubmit, loading }) => {
+const flattenCategoriesList = (rawList = []) => {
+  const map = new Map();
+  for (const item of rawList) {
+    if (!item || !item.id) continue;
+    map.set(item.id, item);
+    if (Array.isArray(item.children)) {
+      for (const child of item.children) {
+        if (child && child.id && !map.has(child.id)) {
+          map.set(child.id, {
+            ...child,
+            parentId: child.parentId || item.id,
+          });
+        }
+      }
+    }
+  }
+  return Array.from(map.values());
+};
+
+const resolveCategoryIds = (initialData, categories) => {
+  if (!initialData) return { parentCategoryId: '', subcategoryId: '' };
+
+  const rawCatId = initialData.categoryId || initialData.category?.id || '';
+  const rawParentId =
+    initialData.category?.parentId || initialData.category?.parent?.id || '';
+
+  if (rawParentId) {
+    return {
+      parentCategoryId: rawParentId,
+      subcategoryId: rawCatId,
+    };
+  }
+
+  const matchedCat = categories.find(
+    (c) =>
+      c.id === rawCatId ||
+      (initialData.category?.slug && c.slug === initialData.category.slug)
+  );
+
+  if (matchedCat) {
+    if (matchedCat.parentId) {
+      return {
+        parentCategoryId: matchedCat.parentId,
+        subcategoryId: matchedCat.id,
+      };
+    }
+    return {
+      parentCategoryId: matchedCat.id,
+      subcategoryId: '',
+    };
+  }
+
+  return {
+    parentCategoryId: rawCatId,
+    subcategoryId: '',
+  };
+};
+
+const ProductForm = ({ initialData, categories: propCategories = [], onSubmit, loading }) => {
+  const [categories, setCategories] = useState(() =>
+    flattenCategoriesList(propCategories)
+  );
   const [formData, setFormData] = useState({
     name: '',
     sku: '',
@@ -35,54 +97,41 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
     variants: [],
   });
 
-  const [categories, setCategories] = useState([]);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const [showUrlInput, setShowUrlInput] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
+    if (Array.isArray(propCategories) && propCategories.length > 0) {
+      setCategories(flattenCategoriesList(propCategories));
+      return;
+    }
     const fetchCategories = async () => {
       try {
         const res = await client.get('/categories?flat=true');
-        setCategories(Array.isArray(res.data) ? res.data : []);
+        setCategories(flattenCategoriesList(Array.isArray(res.data) ? res.data : []));
       } catch (err) {
         console.error('Error loading categories:', err);
       }
     };
     fetchCategories();
-  }, []);
+  }, [propCategories]);
 
+  // Populate form when initialData changes
   useEffect(() => {
     if (initialData) {
-      const rawCatId = initialData.categoryId || initialData.category?.id || '';
-      const matchedCat = categories.find((c) => c.id === rawCatId);
-
-      let resolvedParentId = '';
-      let resolvedSubcategoryId = '';
-
-      if (matchedCat) {
-        if (matchedCat.parentId) {
-          resolvedParentId = matchedCat.parentId;
-          resolvedSubcategoryId = matchedCat.id;
-        } else {
-          resolvedParentId = matchedCat.id;
-          resolvedSubcategoryId = '';
-        }
-      } else if (initialData.category?.parentId) {
-        resolvedParentId = initialData.category.parentId;
-        resolvedSubcategoryId = rawCatId;
-      } else {
-        resolvedParentId = rawCatId;
-        resolvedSubcategoryId = '';
-      }
+      const { parentCategoryId, subcategoryId } = resolveCategoryIds(
+        initialData,
+        categories
+      );
 
       setFormData({
         name: initialData.name || '',
         sku: initialData.sku || '',
-        parentCategoryId: resolvedParentId,
-        subcategoryId: resolvedSubcategoryId,
-        categoryId: resolvedSubcategoryId || resolvedParentId || '',
+        parentCategoryId,
+        subcategoryId,
+        categoryId: subcategoryId || parentCategoryId || '',
         brand: initialData.brand || '',
         badge: initialData.badge || '',
         description: initialData.description || '',
@@ -100,7 +149,7 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
               color: v.color || '',
               flavor: v.flavor || '',
               volume: v.volume || '',
-              price: v.price ?? '',
+              price: v.price ?? initialData.price ?? '',
               stock: v.stock ?? 0,
               active: v.active !== false,
             }))
@@ -108,7 +157,10 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
       });
       if (initialData.imageUrl && initialData.imageUrl.startsWith('http')) {
         setShowUrlInput(true);
+      } else {
+        setShowUrlInput(false);
       }
+      setUploadError('');
     } else {
       setFormData({
         name: '',
@@ -127,8 +179,30 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
         variants: [],
       });
       setUploadError('');
+      setShowUrlInput(false);
     }
-  }, [initialData, categories]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialData]);
+
+  // Backfill parentCategoryId / subcategoryId if categories loaded after initialData
+  useEffect(() => {
+    if (!initialData || categories.length === 0) return;
+    setFormData((prev) => {
+      const resolved = resolveCategoryIds(initialData, categories);
+      if (
+        (!prev.parentCategoryId && resolved.parentCategoryId) ||
+        (prev.parentCategoryId === resolved.subcategoryId && resolved.parentCategoryId)
+      ) {
+        return {
+          ...prev,
+          parentCategoryId: resolved.parentCategoryId,
+          subcategoryId: resolved.subcategoryId,
+          categoryId: resolved.subcategoryId || resolved.parentCategoryId || '',
+        };
+      }
+      return prev;
+    });
+  }, [categories, initialData]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -149,9 +223,33 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
       }));
       return;
     }
+    if (name === 'price') {
+      setFormData((prev) => {
+        const oldPriceStr = String(prev.price ?? '');
+        const updatedVariants = prev.variants.map((v) => {
+          if (String(v.price ?? '') === oldPriceStr || v.price === '' || v.price == null) {
+            return { ...v, price: value };
+          }
+          return v;
+        });
+        return {
+          ...prev,
+          price: value,
+          variants: updatedVariants,
+        };
+      });
+      return;
+    }
     setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
+    }));
+  };
+
+  const handleSyncPriceToAllVariants = () => {
+    setFormData((prev) => ({
+      ...prev,
+      variants: prev.variants.map((v) => ({ ...v, price: prev.price })),
     }));
   };
 
@@ -166,7 +264,7 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
   const addVariantRow = () => {
     setFormData((prev) => ({
       ...prev,
-      variants: [...prev.variants, emptyVariant()],
+      variants: [...prev.variants, emptyVariant(prev.price)],
     }));
   };
 
@@ -231,6 +329,7 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
     const cleanedVariants = formData.variants
       .filter((v) => v.sku && String(v.sku).trim())
       .map((v) => ({
+        ...(v.id ? { id: v.id } : {}),
         sku: String(v.sku).trim(),
         type: v.type ? String(v.type).trim() : null,
         size: v.size ? String(v.size).trim() : null,
@@ -247,7 +346,12 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
         ? Math.min(...cleanedVariants.map((v) => v.price))
         : parseFloat(formData.price || 0);
 
-    const finalCategoryId = formData.subcategoryId || formData.parentCategoryId || null;
+    const finalCategoryId =
+      formData.subcategoryId ||
+      formData.parentCategoryId ||
+      initialData?.categoryId ||
+      initialData?.category?.id ||
+      null;
 
     const payload = {
       name: formData.name.trim(),
@@ -259,7 +363,11 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
       price: basePrice,
       transferPrice: formData.transferPrice ? parseFloat(formData.transferPrice) : null,
       stock:
-        formData.stock !== '' && formData.stock !== undefined && formData.stock !== null
+        cleanedVariants.length > 0
+          ? cleanedVariants.reduce((sum, v) => sum + v.stock, 0)
+          : formData.stock !== '' &&
+            formData.stock !== undefined &&
+            formData.stock !== null
           ? parseInt(formData.stock, 10)
           : 0,
       imageUrl: formData.imageUrl ? formData.imageUrl.trim() : null,
@@ -286,14 +394,19 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
   const subcategoryOptions = !formData.parentCategoryId
     ? [{ value: '', label: 'Primero elegí una categoría...' }]
     : availableSubcategories.length === 0
-      ? [{ value: '', label: 'Sin subcategorías en esta categoría' }]
-      : [
-          { value: '', label: 'Seleccionar subcategoría...' },
-          ...availableSubcategories.map((sub) => ({
-            value: sub.id,
-            label: sub.name,
-          })),
-        ];
+    ? [{ value: '', label: 'Sin subcategorías en esta categoría' }]
+    : [
+        { value: '', label: 'Seleccionar subcategoría (o dejar general)...' },
+        ...availableSubcategories.map((sub) => ({
+          value: sub.id,
+          label: sub.name,
+        })),
+      ];
+
+  // Resolve automatic SKU image if no custom imageUrl is set
+  const skuResolvedImg = initialData ? resolveProductImage(initialData) : null;
+  const activePreviewUrl =
+    formData.imageUrl || skuResolvedImg?.main || skuResolvedImg?.thumb || '';
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-h-[75vh] overflow-y-auto px-1 pr-2">
@@ -321,17 +434,14 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
         <Select
           label="Categoría *"
           name="parentCategoryId"
-          required
+          required={!initialData}
           options={parentCategoryOptions}
           value={formData.parentCategoryId}
           onChange={handleChange}
         />
         <Select
-          label={
-            availableSubcategories.length > 0 ? 'Subcategoría *' : 'Subcategoría'
-          }
+          label="Subcategoría"
           name="subcategoryId"
-          required={availableSubcategories.length > 0}
           disabled={!formData.parentCategoryId || availableSubcategories.length === 0}
           options={subcategoryOptions}
           value={formData.subcategoryId}
@@ -365,7 +475,7 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
           value={formData.price}
           onChange={handleChange}
           min="0"
-          step="1"
+          step="any"
           placeholder="Ej: 15000"
         />
         <Input
@@ -375,15 +485,24 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
           value={formData.transferPrice}
           onChange={handleChange}
           min="0"
-          step="1"
+          step="any"
           placeholder="Opcional"
         />
         <Input
-          label="Stock General"
+          label={
+            formData.variants.length > 0
+              ? 'Stock Total (por variantes)'
+              : 'Stock General'
+          }
           type="number"
           name="stock"
-          value={formData.stock}
+          value={
+            formData.variants.length > 0
+              ? formData.variants.reduce((s, v) => s + Number(v.stock || 0), 0)
+              : formData.stock
+          }
           onChange={handleChange}
+          disabled={formData.variants.length > 0}
           min="0"
           placeholder="0"
         />
@@ -402,7 +521,7 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
 
       {/* Variantes del producto */}
       <div className="p-4 rounded-lg border border-brand-border/25 bg-canvas space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h4 className="font-display text-xs uppercase tracking-widest text-content">
               Variantes ({formData.variants.length})
@@ -411,15 +530,27 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
               Opcional: agregá variantes por tipo, talle, color, sabor/aroma o volumen.
             </p>
           </div>
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            onClick={addVariantRow}
-            className="text-xs py-1 px-2.5"
-          >
-            <FiPlus className="mr-1" /> Agregar variante
-          </Button>
+          <div className="flex items-center gap-2">
+            {formData.variants.length > 0 && (
+              <button
+                type="button"
+                onClick={handleSyncPriceToAllVariants}
+                className="text-[11px] px-2.5 py-1 rounded bg-surface-elevated hover:bg-brand text-content border border-brand-border/30 transition-colors"
+                title="Copiar el Precio Base actual a todas las variantes"
+              >
+                Igualar precio (${Number(formData.price || 0).toLocaleString('es-AR')}) en todas
+              </button>
+            )}
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={addVariantRow}
+              className="text-xs py-1 px-2.5"
+            >
+              <FiPlus className="mr-1" /> Agregar variante
+            </Button>
+          </div>
         </div>
 
         {formData.variants.length > 0 && (
@@ -439,6 +570,7 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
                   <Input
                     label="Precio ($)"
                     type="number"
+                    step="any"
                     value={v.price}
                     onChange={(e) => handleVariantChange(idx, 'price', e.target.value)}
                     placeholder="Precio"
@@ -499,10 +631,10 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
         )}
       </div>
 
-      {/* Subida de Imagen (Opcional: si no tiene foto se muestra el placeholder de marca) */}
+      {/* Subida de Imagen */}
       <div className="p-4 rounded-lg border border-brand-border/25 bg-canvas">
         <label className="block text-xs font-medium uppercase tracking-wider text-content-secondary mb-2">
-          Imagen del Producto (Opcional — si no tiene, se muestra placeholder de marca)
+          Imagen del Producto (Opcional — si no tiene, se usa la foto por SKU o placeholder)
         </label>
 
         <input
@@ -513,11 +645,11 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
           className="hidden"
         />
 
-        {formData.imageUrl ? (
+        {activePreviewUrl ? (
           <div className="flex items-center space-x-3.5 bg-surface p-3 rounded-md border border-brand-border/20">
             <div className="w-16 h-16 bg-canvas rounded overflow-hidden flex-shrink-0 border border-brand-border/25 flex items-center justify-center">
               <img
-                src={formData.imageUrl}
+                src={activePreviewUrl}
                 alt="Preview"
                 className="w-full h-full object-cover"
                 onError={(e) => {
@@ -528,9 +660,11 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
             </div>
             <div className="flex-1 min-w-0">
               <span className="text-[10px] font-medium uppercase tracking-wider text-emerald-300 bg-emerald-950/60 px-2 py-0.5 rounded inline-block mb-1 border border-emerald-800/40">
-                ✓ Imagen asignada
+                {formData.imageUrl ? '✓ Imagen personalizada' : '✓ Imagen asignada por SKU'}
               </span>
-              <p className="text-xs text-content-muted truncate font-mono">{formData.imageUrl}</p>
+              <p className="text-xs text-content-muted truncate font-mono">
+                {formData.imageUrl || activePreviewUrl}
+              </p>
               <div className="flex space-x-2 mt-2">
                 <button
                   type="button"
@@ -538,15 +672,17 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
                   disabled={uploadingImage}
                   className="text-xs bg-surface-elevated hover:bg-brand text-content px-2.5 py-1 rounded transition-colors flex items-center border border-brand-border/25"
                 >
-                  <FiRefreshCw className="mr-1 text-xs" /> Cambiar
+                  <FiRefreshCw className="mr-1 text-xs" /> Reemplazar foto
                 </button>
-                <button
-                  type="button"
-                  onClick={handleRemoveImage}
-                  className="text-xs bg-rose-950/50 hover:bg-rose-900/60 text-rose-300 px-2.5 py-1 rounded transition-colors flex items-center border border-rose-800/40"
-                >
-                  <FiTrash2 className="mr-1 text-xs" /> Quitar
-                </button>
+                {formData.imageUrl && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    className="text-xs bg-rose-950/50 hover:bg-rose-900/60 text-rose-300 px-2.5 py-1 rounded transition-colors flex items-center border border-rose-800/40"
+                  >
+                    <FiTrash2 className="mr-1 text-xs" /> Quitar
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -624,7 +760,9 @@ const ProductForm = ({ initialData, onSubmit, loading }) => {
           fullWidth
           className="py-3 text-xs sm:text-sm font-medium"
         >
-          {initialData ? 'Actualizar Producto' : 'Guardar Producto en Catálogo'}
+          {initialData && (initialData.id || initialData._id)
+            ? 'Guardar Cambios del Producto'
+            : 'Guardar Producto en Catálogo'}
         </Button>
       </div>
     </form>
