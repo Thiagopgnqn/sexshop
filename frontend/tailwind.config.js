@@ -6,37 +6,41 @@ export default {
   ],
   theme: {
     extend: {
+      // Los tokens se resuelven con variables CSS (ver src/index.css) para que el
+      // panel de administración (.theme-admin) use una variante más suave y clara
+      // del mismo tema, sin duplicar clases en los componentes.
       colors: {
-        canvas: '#0F0A0A',
+        canvas: 'rgb(var(--c-canvas) / <alpha-value>)',
         surface: {
-          DEFAULT: '#1A1212',
-          elevated: '#2B1917',
-          hover: '#241716',
-          subtle: '#140D0D',
+          DEFAULT: 'rgb(var(--c-surface) / <alpha-value>)',
+          elevated: 'rgb(var(--c-surface-elevated) / <alpha-value>)',
+          hover: 'rgb(var(--c-surface-hover) / <alpha-value>)',
+          subtle: 'rgb(var(--c-surface-subtle) / <alpha-value>)',
         },
         brand: {
-          DEFAULT: '#5A2A2E',
-          hover: '#6E353A',
-          deep: '#2B1917',
-          muted: '#907878',
+          DEFAULT: 'rgb(var(--c-brand) / <alpha-value>)',
+          hover: 'rgb(var(--c-brand-hover) / <alpha-value>)',
+          deep: 'rgb(var(--c-surface-elevated) / <alpha-value>)',
+          muted: 'rgb(var(--c-mauve) / <alpha-value>)',
+          border: 'rgb(var(--c-line) / <alpha-value>)',
         },
         mauve: {
-          DEFAULT: '#907878',
-          light: '#B8ABA6',
-          dark: '#2B1917',
+          DEFAULT: 'rgb(var(--c-mauve) / <alpha-value>)',
+          light: 'rgb(var(--c-mauve-light) / <alpha-value>)',
+          dark: 'rgb(var(--c-surface-elevated) / <alpha-value>)',
         },
         border: {
-          DEFAULT: 'rgba(144, 120, 120, 0.24)',
-          subtle: 'rgba(144, 120, 120, 0.14)',
-          strong: '#907878',
-          accent: '#5A2A2E',
+          DEFAULT: 'rgb(var(--c-line) / 0.26)',
+          subtle: 'rgb(var(--c-line) / 0.15)',
+          strong: 'rgb(var(--c-line) / <alpha-value>)',
+          accent: 'rgb(var(--c-brand) / <alpha-value>)',
         },
         content: {
-          DEFAULT: '#F2EDE8',
-          main: '#F2EDE8',
-          secondary: '#B8ABA6',
-          muted: '#B8ABA6',
-          subtle: '#907878',
+          DEFAULT: 'rgb(var(--c-content) / <alpha-value>)',
+          main: 'rgb(var(--c-content) / <alpha-value>)',
+          secondary: 'rgb(var(--c-content-secondary) / <alpha-value>)',
+          muted: 'rgb(var(--c-content-muted) / <alpha-value>)',
+          subtle: 'rgb(var(--c-content-subtle) / <alpha-value>)',
         },
         status: {
           success: '#86EFAC',
@@ -50,14 +54,19 @@ export default {
           'error-border': 'rgba(252, 165, 165, 0.35)',
         },
       },
+      // Borde por defecto (cuando un elemento usa `border` sin color explícito):
+      // malva translúcido en vez del gris claro de Tailwind, que encandila.
+      borderColor: {
+        DEFAULT: 'rgb(var(--c-line) / 0.22)',
+      },
       fontFamily: {
         display: ['Jost', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
         sans: ['DM Sans', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
       },
       boxShadow: {
-        'soft': '0 2px 10px 0 rgba(0, 0, 0, 0.35)',
-        'lifted': '0 10px 30px -5px rgba(0, 0, 0, 0.55)',
-        'overlay': '0 20px 50px -12px rgba(0, 0, 0, 0.75)',
+        'soft': '0 1px 2px 0 rgba(0, 0, 0, 0.18), 0 2px 8px -2px rgba(0, 0, 0, 0.22)',
+        'lifted': '0 10px 30px -8px rgba(0, 0, 0, 0.45)',
+        'overlay': '0 24px 60px -16px rgba(0, 0, 0, 0.6)',
       },
       borderRadius: {
         'sm': '4px',

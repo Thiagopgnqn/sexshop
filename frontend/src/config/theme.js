@@ -61,6 +61,7 @@ export const themeConfig = {
 
   navigation: [
     { label: 'Catálogo', href: '/catalogo' },
+    { label: 'Ofertas', href: '/ofertas' },
     { label: 'Lencería', href: '/catalogo?category=lenceria' },
     { label: 'Cosmética', href: '/catalogo?category=cosmetica-intima' },
     { label: 'Juguetes', href: '/catalogo?category=dilatadores-consoladores-y-vibradores' },

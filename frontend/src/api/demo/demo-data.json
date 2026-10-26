@@ -1,5 +1,16 @@
 {
-  "generatedAt": "2026-10-23T03:01:40.159Z",
+  "generatedAt": "2026-10-26T03:10:20.427Z",
+  "settings": {
+    "shippingCost": 4500,
+    "freeShippingThreshold": 45000,
+    "freePickupEnabled": true,
+    "transferDiscountPercent": 10,
+    "transferDiscountEnabled": true,
+    "priceHistoryDays": 30,
+    "generalTermsText": "Envíos 100% discretos en empaque neutro sin identificación del contenido.",
+    "shippingNoticeText": "Envío gratis a todo el país superando el monto mínimo de compra.",
+    "bankTransferInstructions": "Transferencia bancaria. Te enviaremos los datos de CBU y Alias al confirmar el pedido por WhatsApp."
+  },
   "categories": [
     {
       "id": "cat_lenceria",
@@ -576,7 +587,7 @@
       },
       "active": true,
       "soldCount": 24,
-      "createdAt": "2026-10-23T02:01:40.157Z",
+      "createdAt": "2026-10-26T02:10:20.424Z",
       "variants": []
     },
     {
@@ -605,7 +616,7 @@
       },
       "active": true,
       "soldCount": 5,
-      "createdAt": "2026-10-23T01:01:40.159Z",
+      "createdAt": "2026-10-26T01:10:20.426Z",
       "variants": []
     },
     {
@@ -634,7 +645,7 @@
       },
       "active": true,
       "soldCount": 5,
-      "createdAt": "2026-10-23T00:01:40.159Z",
+      "createdAt": "2026-10-26T00:10:20.426Z",
       "variants": []
     },
     {
@@ -663,7 +674,7 @@
       },
       "active": true,
       "soldCount": 21,
-      "createdAt": "2026-10-22T23:01:40.159Z",
+      "createdAt": "2026-10-25T23:10:20.426Z",
       "variants": [
         {
           "id": "demo_var_001",
@@ -719,7 +730,7 @@
       },
       "active": true,
       "soldCount": 5,
-      "createdAt": "2026-10-22T22:01:40.159Z",
+      "createdAt": "2026-10-25T22:10:20.426Z",
       "variants": []
     },
     {
@@ -748,7 +759,7 @@
       },
       "active": true,
       "soldCount": 5,
-      "createdAt": "2026-10-22T21:01:40.159Z",
+      "createdAt": "2026-10-25T21:10:20.426Z",
       "variants": []
     },
     {
@@ -773,7 +784,7 @@
       },
       "active": true,
       "soldCount": 5,
-      "createdAt": "2026-10-22T20:01:40.159Z",
+      "createdAt": "2026-10-25T20:10:20.426Z",
       "variants": []
     },
     {
@@ -802,7 +813,7 @@
       },
       "active": true,
       "soldCount": 5,
-      "createdAt": "2026-10-22T19:01:40.159Z",
+      "createdAt": "2026-10-25T19:10:20.426Z",
       "variants": []
     },
     {
@@ -831,7 +842,7 @@
       },
       "active": true,
       "soldCount": 5,
-      "createdAt": "2026-10-22T18:01:40.159Z",
+      "createdAt": "2026-10-25T18:10:20.426Z",
       "variants": []
     },
     {
@@ -860,7 +871,7 @@
       },
       "active": true,
       "soldCount": 5,
-      "createdAt": "2026-10-22T17:01:40.159Z",
+      "createdAt": "2026-10-25T17:10:20.426Z",
       "variants": [
         {
           "id": "demo_var_003",
@@ -916,7 +927,7 @@
       },
       "active": true,
       "soldCount": 5,
-      "createdAt": "2026-10-22T16:01:40.159Z",
+      "createdAt": "2026-10-25T16:10:20.426Z",
       "variants": [
         {
           "id": "demo_var_005",
@@ -972,7 +983,7 @@
       },
       "active": true,
       "soldCount": 5,
-      "createdAt": "2026-10-22T15:01:40.159Z",
+      "createdAt": "2026-10-25T15:10:20.426Z",
       "variants": [
         {
           "id": "demo_var_007",
@@ -1028,7 +1039,7 @@
       },
       "active": true,
       "soldCount": 5,
-      "createdAt": "2026-10-22T14:01:40.159Z",
+      "createdAt": "2026-10-25T14:10:20.426Z",
       "variants": [
         {
           "id": "demo_var_009",
@@ -1071,7 +1082,7 @@
       },
       "active": true,
       "soldCount": 11,
-      "createdAt": "2026-10-22T13:01:40.159Z",
+      "createdAt": "2026-10-25T13:10:20.426Z",
       "variants": [
         {
           "id": "demo_var_010",
@@ -1257,7 +1268,7 @@
       },
       "active": true,
       "soldCount": 10,
-      "createdAt": "2026-10-22T12:01:40.159Z",
+      "createdAt": "2026-10-25T12:10:20.426Z",
       "variants": [
         {
           "id": "demo_var_022",
@@ -1391,7 +1402,7 @@
       },
       "active": true,
       "soldCount": 5,
-      "createdAt": "2026-10-22T11:01:40.159Z",
+      "createdAt": "2026-10-25T11:10:20.426Z",
       "variants": [
         {
           "id": "demo_var_030",
@@ -1447,7 +1458,7 @@
       },
       "active": true,
       "soldCount": 5,
-      "createdAt": "2026-10-22T10:01:40.159Z",
+      "createdAt": "2026-10-25T10:10:20.426Z",
       "variants": [
         {
           "id": "demo_var_032",
@@ -1503,7 +1514,7 @@
       },
       "active": true,
       "soldCount": 7,
-      "createdAt": "2026-10-22T09:01:40.159Z",
+      "createdAt": "2026-10-25T09:10:20.426Z",
       "variants": [
         {
           "id": "demo_var_034",
@@ -1572,7 +1583,7 @@
       },
       "active": true,
       "soldCount": 5,
-      "createdAt": "2026-10-22T08:01:40.159Z",
+      "createdAt": "2026-10-25T08:10:20.426Z",
       "variants": [
         {
           "id": "demo_var_037",
@@ -1615,7 +1626,7 @@
       },
       "active": true,
       "soldCount": 5,
-      "createdAt": "2026-10-22T07:01:40.159Z",
+      "createdAt": "2026-10-25T07:10:20.426Z",
       "variants": [
         {
           "id": "demo_var_038",
@@ -1671,7 +1682,7 @@
       },
       "active": true,
       "soldCount": 5,
-      "createdAt": "2026-10-22T06:01:40.159Z",
+      "createdAt": "2026-10-25T06:10:20.426Z",
       "variants": []
     },
     {
@@ -1700,7 +1711,7 @@
       },
       "active": true,
       "soldCount": 5,
-      "createdAt": "2026-10-22T05:01:40.159Z",
+      "createdAt": "2026-10-25T05:10:20.426Z",
       "variants": []
     },
     {
@@ -1725,7 +1736,7 @@
       },
       "active": true,
       "soldCount": 5,
-      "createdAt": "2026-10-22T04:01:40.159Z",
+      "createdAt": "2026-10-25T04:10:20.426Z",
       "variants": []
     },
     {
@@ -1750,7 +1761,7 @@
       },
       "active": true,
       "soldCount": 5,
-      "createdAt": "2026-10-22T03:01:40.159Z",
+      "createdAt": "2026-10-25T03:10:20.426Z",
       "variants": []
     },
     {
@@ -1779,7 +1790,7 @@
       },
       "active": true,
       "soldCount": 5,
-      "createdAt": "2026-10-22T02:01:40.159Z",
+      "createdAt": "2026-10-25T02:10:20.426Z",
       "variants": [
         {
           "id": "demo_var_040",
@@ -1887,7 +1898,7 @@
       },
       "active": true,
       "soldCount": 5,
-      "createdAt": "2026-10-22T01:01:40.159Z",
+      "createdAt": "2026-10-25T01:10:20.426Z",
       "variants": []
     },
     {
@@ -1916,7 +1927,7 @@
       },
       "active": true,
       "soldCount": 5,
-      "createdAt": "2026-10-22T00:01:40.159Z",
+      "createdAt": "2026-10-25T00:10:20.426Z",
       "variants": [
         {
           "id": "demo_var_046",
@@ -1972,7 +1983,7 @@
       },
       "active": true,
       "soldCount": 5,
-      "createdAt": "2026-10-21T23:01:40.159Z",
+      "createdAt": "2026-10-24T23:10:20.426Z",
       "variants": [
         {
           "id": "demo_var_048",
@@ -2028,7 +2039,7 @@
       },
       "active": true,
       "soldCount": -4,
-      "createdAt": "2026-10-21T22:01:40.159Z",
+      "createdAt": "2026-10-24T22:10:20.427Z",
       "variants": [
         {
           "id": "demo_var_050",
@@ -2097,7 +2108,7 @@
       },
       "active": true,
       "soldCount": 5,
-      "createdAt": "2026-10-21T21:01:40.159Z",
+      "createdAt": "2026-10-24T21:10:20.427Z",
       "variants": [
         {
           "id": "demo_var_053",
@@ -2127,5 +2138,1323 @@
         }
       ]
     }
-  ]
+  ],
+  "priceHistory": [
+    {
+      "id": "demo_ph_demo_prod_001_baby-doll-venecia_base",
+      "productId": "demo_prod_001_baby-doll-venecia",
+      "variantId": null,
+      "oldPrice": 32000,
+      "newPrice": 32000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_prod_002_baby-doll-rose_base",
+      "productId": "demo_prod_002_baby-doll-rose",
+      "variantId": null,
+      "oldPrice": 26000,
+      "newPrice": 26000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_prod_003_vestido-vinilo-verona_base",
+      "productId": "demo_prod_003_vestido-vinilo-verona",
+      "variantId": null,
+      "oldPrice": 39500,
+      "newPrice": 39500,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_prod_004_body-marley_base",
+      "productId": "demo_prod_004_body-marley",
+      "variantId": null,
+      "oldPrice": 16000,
+      "newPrice": 16000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_var_001",
+      "productId": "demo_prod_004_body-marley",
+      "variantId": "demo_var_001",
+      "oldPrice": 16000,
+      "newPrice": 16000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_002",
+      "productId": "demo_prod_004_body-marley",
+      "variantId": "demo_var_002",
+      "oldPrice": 16000,
+      "newPrice": 16000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_prod_005_conjunto-hera_base",
+      "productId": "demo_prod_005_conjunto-hera",
+      "variantId": null,
+      "oldPrice": 24000,
+      "newPrice": 24000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_prod_006_liguero-pandora_base",
+      "productId": "demo_prod_006_liguero-pandora",
+      "variantId": null,
+      "oldPrice": 16000,
+      "newPrice": 16000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_prod_007_zunga_base",
+      "productId": "demo_prod_007_zunga",
+      "variantId": null,
+      "oldPrice": 17000,
+      "newPrice": 17000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_prod_008_fantasia-enfermera-pasionel_base",
+      "productId": "demo_prod_008_fantasia-enfermera-pasionel",
+      "variantId": null,
+      "oldPrice": 42000,
+      "newPrice": 42000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_prod_009_fantasia-conejita-pasionel_base",
+      "productId": "demo_prod_009_fantasia-conejita-pasionel",
+      "variantId": null,
+      "oldPrice": 42000,
+      "newPrice": 42000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_prod_010_fantasia-colegiala-ft-ft-03_base",
+      "productId": "demo_prod_010_fantasia-colegiala-ft-ft-03",
+      "variantId": null,
+      "oldPrice": 28000,
+      "newPrice": 28000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_var_003",
+      "productId": "demo_prod_010_fantasia-colegiala-ft-ft-03",
+      "variantId": "demo_var_003",
+      "oldPrice": 28000,
+      "newPrice": 28000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_004",
+      "productId": "demo_prod_010_fantasia-colegiala-ft-ft-03",
+      "variantId": "demo_var_004",
+      "oldPrice": 28000,
+      "newPrice": 28000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_prod_011_catsuit-colegiala_base",
+      "productId": "demo_prod_011_catsuit-colegiala",
+      "variantId": null,
+      "oldPrice": 18000,
+      "newPrice": 18000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_var_005",
+      "productId": "demo_prod_011_catsuit-colegiala",
+      "variantId": "demo_var_005",
+      "oldPrice": 18000,
+      "newPrice": 18000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_006",
+      "productId": "demo_prod_011_catsuit-colegiala",
+      "variantId": "demo_var_006",
+      "oldPrice": 18000,
+      "newPrice": 18000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_prod_012_gel-natural_base",
+      "productId": "demo_prod_012_gel-natural",
+      "variantId": null,
+      "oldPrice": 13000,
+      "newPrice": 13000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_var_007",
+      "productId": "demo_prod_012_gel-natural",
+      "variantId": "demo_var_007",
+      "oldPrice": 13000,
+      "newPrice": 13000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_008",
+      "productId": "demo_prod_012_gel-natural",
+      "variantId": "demo_var_008",
+      "oldPrice": 18000,
+      "newPrice": 18000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_prod_013_gel-efecto-calor_base",
+      "productId": "demo_prod_013_gel-efecto-calor",
+      "variantId": null,
+      "oldPrice": 13000,
+      "newPrice": 13000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_var_009",
+      "productId": "demo_prod_013_gel-efecto-calor",
+      "variantId": "demo_var_009",
+      "oldPrice": 13000,
+      "newPrice": 13000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_prod_014_vela-de-masaje-30-g_base",
+      "productId": "demo_prod_014_vela-de-masaje-30-g",
+      "variantId": null,
+      "oldPrice": 12000,
+      "newPrice": 12000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_var_010",
+      "productId": "demo_prod_014_vela-de-masaje-30-g",
+      "variantId": "demo_var_010",
+      "oldPrice": 12000,
+      "newPrice": 12000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_011",
+      "productId": "demo_prod_014_vela-de-masaje-30-g",
+      "variantId": "demo_var_011",
+      "oldPrice": 12000,
+      "newPrice": 12000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_012",
+      "productId": "demo_prod_014_vela-de-masaje-30-g",
+      "variantId": "demo_var_012",
+      "oldPrice": 12000,
+      "newPrice": 12000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_013",
+      "productId": "demo_prod_014_vela-de-masaje-30-g",
+      "variantId": "demo_var_013",
+      "oldPrice": 12000,
+      "newPrice": 12000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_014",
+      "productId": "demo_prod_014_vela-de-masaje-30-g",
+      "variantId": "demo_var_014",
+      "oldPrice": 12000,
+      "newPrice": 12000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_015",
+      "productId": "demo_prod_014_vela-de-masaje-30-g",
+      "variantId": "demo_var_015",
+      "oldPrice": 12000,
+      "newPrice": 12000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_016",
+      "productId": "demo_prod_014_vela-de-masaje-30-g",
+      "variantId": "demo_var_016",
+      "oldPrice": 12000,
+      "newPrice": 12000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_017",
+      "productId": "demo_prod_014_vela-de-masaje-30-g",
+      "variantId": "demo_var_017",
+      "oldPrice": 12000,
+      "newPrice": 12000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_018",
+      "productId": "demo_prod_014_vela-de-masaje-30-g",
+      "variantId": "demo_var_018",
+      "oldPrice": 12000,
+      "newPrice": 12000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_019",
+      "productId": "demo_prod_014_vela-de-masaje-30-g",
+      "variantId": "demo_var_019",
+      "oldPrice": 12000,
+      "newPrice": 12000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_020",
+      "productId": "demo_prod_014_vela-de-masaje-30-g",
+      "variantId": "demo_var_020",
+      "oldPrice": 12000,
+      "newPrice": 12000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_021",
+      "productId": "demo_prod_014_vela-de-masaje-30-g",
+      "variantId": "demo_var_021",
+      "oldPrice": 12000,
+      "newPrice": 12000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_prod_015_aceite-comestible-love-potion_base",
+      "productId": "demo_prod_015_aceite-comestible-love-potion",
+      "variantId": null,
+      "oldPrice": 13000,
+      "newPrice": 13000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_var_022",
+      "productId": "demo_prod_015_aceite-comestible-love-potion",
+      "variantId": "demo_var_022",
+      "oldPrice": 13000,
+      "newPrice": 13000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_023",
+      "productId": "demo_prod_015_aceite-comestible-love-potion",
+      "variantId": "demo_var_023",
+      "oldPrice": 13000,
+      "newPrice": 13000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_024",
+      "productId": "demo_prod_015_aceite-comestible-love-potion",
+      "variantId": "demo_var_024",
+      "oldPrice": 13000,
+      "newPrice": 13000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_025",
+      "productId": "demo_prod_015_aceite-comestible-love-potion",
+      "variantId": "demo_var_025",
+      "oldPrice": 13000,
+      "newPrice": 13000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_026",
+      "productId": "demo_prod_015_aceite-comestible-love-potion",
+      "variantId": "demo_var_026",
+      "oldPrice": 13000,
+      "newPrice": 13000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_027",
+      "productId": "demo_prod_015_aceite-comestible-love-potion",
+      "variantId": "demo_var_027",
+      "oldPrice": 13000,
+      "newPrice": 13000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_028",
+      "productId": "demo_prod_015_aceite-comestible-love-potion",
+      "variantId": "demo_var_028",
+      "oldPrice": 13000,
+      "newPrice": 13000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_029",
+      "productId": "demo_prod_015_aceite-comestible-love-potion",
+      "variantId": "demo_var_029",
+      "oldPrice": 13000,
+      "newPrice": 13000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_prod_016_crema-corporal-para-masaje_base",
+      "productId": "demo_prod_016_crema-corporal-para-masaje",
+      "variantId": null,
+      "oldPrice": 18000,
+      "newPrice": 18000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_var_030",
+      "productId": "demo_prod_016_crema-corporal-para-masaje",
+      "variantId": "demo_var_030",
+      "oldPrice": 18000,
+      "newPrice": 18000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_031",
+      "productId": "demo_prod_016_crema-corporal-para-masaje",
+      "variantId": "demo_var_031",
+      "oldPrice": 18000,
+      "newPrice": 18000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_prod_017_gel-intimo-sens-bomb_base",
+      "productId": "demo_prod_017_gel-intimo-sens-bomb",
+      "variantId": null,
+      "oldPrice": 12000,
+      "newPrice": 12000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_var_032",
+      "productId": "demo_prod_017_gel-intimo-sens-bomb",
+      "variantId": "demo_var_032",
+      "oldPrice": 12000,
+      "newPrice": 12000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_033",
+      "productId": "demo_prod_017_gel-intimo-sens-bomb",
+      "variantId": "demo_var_033",
+      "oldPrice": 12000,
+      "newPrice": 12000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_prod_018_perfume-hot-inevitable_base",
+      "productId": "demo_prod_018_perfume-hot-inevitable",
+      "variantId": null,
+      "oldPrice": 37000,
+      "newPrice": 37000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_var_034",
+      "productId": "demo_prod_018_perfume-hot-inevitable",
+      "variantId": "demo_var_034",
+      "oldPrice": 37000,
+      "newPrice": 37000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_035",
+      "productId": "demo_prod_018_perfume-hot-inevitable",
+      "variantId": "demo_var_035",
+      "oldPrice": 37000,
+      "newPrice": 37000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_036",
+      "productId": "demo_prod_018_perfume-hot-inevitable",
+      "variantId": "demo_var_036",
+      "oldPrice": 37000,
+      "newPrice": 37000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_prod_019_perfume-petit-mort_base",
+      "productId": "demo_prod_019_perfume-petit-mort",
+      "variantId": null,
+      "oldPrice": 32000,
+      "newPrice": 32000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_var_037",
+      "productId": "demo_prod_019_perfume-petit-mort",
+      "variantId": "demo_var_037",
+      "oldPrice": 32000,
+      "newPrice": 32000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_prod_020_perfume-it-femme_base",
+      "productId": "demo_prod_020_perfume-it-femme",
+      "variantId": null,
+      "oldPrice": 30000,
+      "newPrice": 30000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_var_038",
+      "productId": "demo_prod_020_perfume-it-femme",
+      "variantId": "demo_var_038",
+      "oldPrice": 30000,
+      "newPrice": 30000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_039",
+      "productId": "demo_prod_020_perfume-it-femme",
+      "variantId": "demo_var_039",
+      "oldPrice": 30000,
+      "newPrice": 30000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_prod_021_jenga-sex_base",
+      "productId": "demo_prod_021_jenga-sex",
+      "variantId": null,
+      "oldPrice": 24000,
+      "newPrice": 24000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_prod_022_naipe-kamasutra_base",
+      "productId": "demo_prod_022_naipe-kamasutra",
+      "variantId": null,
+      "oldPrice": 15000,
+      "newPrice": 15000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_prod_023_anillo-jelly_base",
+      "productId": "demo_prod_023_anillo-jelly",
+      "variantId": null,
+      "oldPrice": 6000,
+      "newPrice": 6000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_prod_024_torito-vibrador_base",
+      "productId": "demo_prod_024_torito-vibrador",
+      "variantId": null,
+      "oldPrice": 26000,
+      "newPrice": 26000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_prod_025_esposas_base",
+      "productId": "demo_prod_025_esposas",
+      "variantId": null,
+      "oldPrice": 16000,
+      "newPrice": 16000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_var_040",
+      "productId": "demo_prod_025_esposas",
+      "variantId": "demo_var_040",
+      "oldPrice": 17000,
+      "newPrice": 17000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_041",
+      "productId": "demo_prod_025_esposas",
+      "variantId": "demo_var_041",
+      "oldPrice": 19000,
+      "newPrice": 19000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_042",
+      "productId": "demo_prod_025_esposas",
+      "variantId": "demo_var_042",
+      "oldPrice": 22000,
+      "newPrice": 22000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_043",
+      "productId": "demo_prod_025_esposas",
+      "variantId": "demo_var_043",
+      "oldPrice": 26000,
+      "newPrice": 26000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_044",
+      "productId": "demo_prod_025_esposas",
+      "variantId": "demo_var_044",
+      "oldPrice": 16000,
+      "newPrice": 16000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_045",
+      "productId": "demo_prod_025_esposas",
+      "variantId": "demo_var_045",
+      "oldPrice": 17000,
+      "newPrice": 17000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_prod_026_antifaz-ciego_base",
+      "productId": "demo_prod_026_antifaz-ciego",
+      "variantId": null,
+      "oldPrice": 11000,
+      "newPrice": 11000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_prod_027_fusta_base",
+      "productId": "demo_prod_027_fusta",
+      "variantId": null,
+      "oldPrice": 19000,
+      "newPrice": 19000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_var_046",
+      "productId": "demo_prod_027_fusta",
+      "variantId": "demo_var_046",
+      "oldPrice": 19000,
+      "newPrice": 19000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_047",
+      "productId": "demo_prod_027_fusta",
+      "variantId": "demo_var_047",
+      "oldPrice": 22000,
+      "newPrice": 22000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_prod_028_kit-negro_base",
+      "productId": "demo_prod_028_kit-negro",
+      "variantId": null,
+      "oldPrice": 29000,
+      "newPrice": 29000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_var_048",
+      "productId": "demo_prod_028_kit-negro",
+      "variantId": "demo_var_048",
+      "oldPrice": 29000,
+      "newPrice": 29000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_049",
+      "productId": "demo_prod_028_kit-negro",
+      "variantId": "demo_var_049",
+      "oldPrice": 44000,
+      "newPrice": 44000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_prod_029_safary_base",
+      "productId": "demo_prod_029_safary",
+      "variantId": null,
+      "oldPrice": 20000,
+      "newPrice": 20000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_var_050",
+      "productId": "demo_prod_029_safary",
+      "variantId": "demo_var_050",
+      "oldPrice": 20000,
+      "newPrice": 20000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_051",
+      "productId": "demo_prod_029_safary",
+      "variantId": "demo_var_051",
+      "oldPrice": 27000,
+      "newPrice": 27000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_052",
+      "productId": "demo_prod_029_safary",
+      "variantId": "demo_var_052",
+      "oldPrice": 29000,
+      "newPrice": 29000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_prod_030_escorpion_base",
+      "productId": "demo_prod_030_escorpion",
+      "variantId": null,
+      "oldPrice": 16000,
+      "newPrice": 16000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_CATALOGO"
+    },
+    {
+      "id": "demo_ph_demo_var_053",
+      "productId": "demo_prod_030_escorpion",
+      "variantId": "demo_var_053",
+      "oldPrice": 16000,
+      "newPrice": 16000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    },
+    {
+      "id": "demo_ph_demo_var_054",
+      "productId": "demo_prod_030_escorpion",
+      "variantId": "demo_var_054",
+      "oldPrice": 27000,
+      "newPrice": 27000,
+      "changedAt": "2026-09-11T03:10:20.427Z",
+      "changedBy": "DEMO_SEED",
+      "reason": "PRECIO_INICIAL_VARIANTE"
+    }
+  ],
+  "campaigns": [
+    {
+      "id": "demo_camp_blackfriday",
+      "name": "Black Friday",
+      "slug": "black-friday",
+      "status": "ACTIVE",
+      "startsAt": "2026-10-25T03:10:20.427Z",
+      "endsAt": "2026-11-02T03:10:20.427Z",
+      "priority": 20,
+      "active": true,
+      "headline": "Black Friday Nocturna: Descuentos de Temporada",
+      "subheadline": "Hasta 30% OFF en productos seleccionados y promociones por tiempo limitado con envíos confidenciales.",
+      "description": "Campaña activa de Black Friday con promociones de temporada y combos de ahorro.",
+      "theme": "black-friday",
+      "announcementText": "⚡ Black Friday: Hasta 30% OFF en productos seleccionados + Envíos discretos",
+      "announcementLink": "/campanas/black-friday",
+      "conditionsText": "Válido durante el período de Black Friday o hasta agotar stock disponible. Descuentos no acumulables con otros cupones. Envíos 100% discretos en Córdoba.",
+      "showCountdown": true,
+      "landingEnabled": true,
+      "seoTitle": "Black Friday Nocturna | Ofertas Exclusivas",
+      "seoDescription": "Aprovechá las promociones destacadas en boutique íntima con envíos confidenciales.",
+      "createdAt": "2026-10-26T03:10:20.427Z",
+      "updatedAt": "2026-10-26T03:10:20.427Z"
+    },
+    {
+      "id": "demo_camp_cyberweek",
+      "name": "Cyber Week",
+      "slug": "cyber-week",
+      "status": "SCHEDULED",
+      "startsAt": "2026-11-10T03:10:20.427Z",
+      "endsAt": "2026-11-17T03:10:20.427Z",
+      "priority": 15,
+      "active": true,
+      "headline": "Cyber Week: Anticipo de Promociones Online",
+      "subheadline": "Próximamente beneficios exclusivos y combos para parejas.",
+      "description": "Campaña programada de Cyber Week.",
+      "theme": "cyber-sale",
+      "announcementText": "🚀 Próximamente: Cyber Week con beneficios exclusivos",
+      "announcementLink": "/campanas/cyber-week",
+      "conditionsText": "Promoción programada. Envíos discretos a todo el país.",
+      "showCountdown": true,
+      "landingEnabled": true,
+      "seoTitle": "Cyber Week en Nocturna | Próximamente",
+      "seoDescription": "Anticipate a las ofertas de Cyber Week en Nocturna SexShop.",
+      "createdAt": "2026-10-26T03:10:20.427Z",
+      "updatedAt": "2026-10-26T03:10:20.427Z"
+    },
+    {
+      "id": "demo_camp_navidad",
+      "name": "Navidad",
+      "slug": "navidad",
+      "status": "DRAFT",
+      "startsAt": null,
+      "endsAt": null,
+      "priority": 5,
+      "active": false,
+      "headline": "Regalos íntimos para estas fiestas",
+      "subheadline": "Borrador de campaña navideña y fin de año.",
+      "description": "Borrador de campaña navideña y fin de año.",
+      "theme": "navidad",
+      "announcementText": "✨ Anticipo de Navidad: Sets exclusivos para regalar",
+      "announcementLink": "/campanas/navidad",
+      "conditionsText": "Promoción especial para las fiestas. Entregas programadas en Córdoba.",
+      "showCountdown": true,
+      "landingEnabled": true,
+      "seoTitle": "Navidad en Nocturna | Regalos Íntimos",
+      "seoDescription": "Encontrá el regalo ideal para estas fiestas con empaque 100% neutro.",
+      "createdAt": "2026-10-26T03:10:20.427Z",
+      "updatedAt": "2026-10-26T03:10:20.427Z"
+    },
+    {
+      "id": "demo_camp_madre",
+      "name": "Día de la Madre",
+      "slug": "dia-de-la-madre",
+      "status": "ENDED",
+      "startsAt": "2026-10-06T03:10:20.427Z",
+      "endsAt": "2026-10-16T03:10:20.427Z",
+      "priority": 0,
+      "active": false,
+      "headline": "Especial Día de la Madre",
+      "subheadline": "Promociones pasadas de la temporada.",
+      "description": "Campaña finalizada / plantilla.",
+      "theme": "dia-de-la-madre",
+      "announcementText": "🌸 Campaña finalizada",
+      "announcementLink": "/campanas/dia-de-la-madre",
+      "conditionsText": "Campaña finalizada.",
+      "showCountdown": false,
+      "landingEnabled": false,
+      "seoTitle": "Especial Día de la Madre | Nocturna Sexshop",
+      "seoDescription": "Campaña de archivo.",
+      "createdAt": "2026-10-01T03:10:20.427Z",
+      "updatedAt": "2026-10-16T03:10:20.427Z"
+    }
+  ],
+  "promotions": [
+    {
+      "id": "demo_promo_bf_lenceria",
+      "campaignId": "demo_camp_blackfriday",
+      "name": "20% OFF en Lencería",
+      "kind": "PERCENT",
+      "value": 20,
+      "stackable": true,
+      "startsAt": null,
+      "endsAt": null,
+      "active": true,
+      "priority": 5,
+      "targets": [
+        {
+          "targetType": "CATEGORY",
+          "targetId": "cat_lenceria",
+          "excluded": false
+        }
+      ]
+    },
+    {
+      "id": "demo_promo_2x1_cosmetica",
+      "campaignId": "demo_camp_blackfriday",
+      "name": "2x1 en Cosmética íntima",
+      "kind": "BUY_X_PAY_Y",
+      "buyQuantity": 2,
+      "payQuantity": 1,
+      "stackable": false,
+      "startsAt": null,
+      "endsAt": null,
+      "active": true,
+      "priority": 8,
+      "targets": [
+        {
+          "targetType": "CATEGORY",
+          "targetId": "cat_cosmetica-intima",
+          "excluded": false
+        }
+      ]
+    },
+    {
+      "id": "demo_promo_combo_parejas",
+      "campaignId": "demo_camp_blackfriday",
+      "name": "Combo Sensorial: Aceite + Vela a $22.000",
+      "kind": "BUNDLE_PRICE",
+      "bundleSkus": "[\"A27-GRP\",\"D63-GRP\"]",
+      "value": 22000,
+      "stackable": false,
+      "active": true,
+      "priority": 9,
+      "targets": [
+        {
+          "targetType": "PRODUCT",
+          "targetId": "demo_prod_015_aceite-comestible-love-potion",
+          "excluded": false
+        },
+        {
+          "targetType": "PRODUCT",
+          "targetId": "demo_prod_014_vela-de-masaje-30-g",
+          "excluded": false
+        }
+      ]
+    },
+    {
+      "id": "demo_promo_tiered",
+      "campaignId": "demo_camp_blackfriday",
+      "name": "Descuento Escalonado por Cantidad",
+      "kind": "TIERED",
+      "stackable": true,
+      "active": true,
+      "priority": 3,
+      "tiers": "[{\"minQuantity\":3,\"discountPercent\":10},{\"minQuantity\":5,\"discountPercent\":20}]",
+      "targets": [
+        {
+          "targetType": "ALL",
+          "excluded": false
+        }
+      ]
+    }
+  ],
+  "coupons": [
+    {
+      "id": "demo_coupon_bienvenida10",
+      "code": "BIENVENIDA10",
+      "kind": "PERCENT",
+      "value": 10,
+      "minOrderAmount": 20000,
+      "maxDiscountAmount": 10000,
+      "startsAt": "2026-09-26T03:10:20.427Z",
+      "endsAt": "2026-12-25T03:10:20.427Z",
+      "usageLimitTotal": 100,
+      "usageLimitPerCustomer": 1,
+      "usedCount": 3,
+      "active": true,
+      "stackableWithPromotions": true,
+      "campaignId": "demo_camp_madre",
+      "appliesTo": "ALL",
+      "createdAt": "2026-10-26T03:10:20.427Z",
+      "updatedAt": "2026-10-26T03:10:20.427Z"
+    },
+    {
+      "id": "demo_coupon_enviogratis",
+      "code": "ENVIOGRATIS",
+      "kind": "FREE_SHIPPING",
+      "value": 0,
+      "minOrderAmount": 15000,
+      "startsAt": "2026-10-11T03:10:20.427Z",
+      "endsAt": "2026-12-10T03:10:20.427Z",
+      "usageLimitTotal": 200,
+      "usageLimitPerCustomer": 2,
+      "usedCount": 1,
+      "active": true,
+      "stackableWithPromotions": true,
+      "campaignId": null,
+      "appliesTo": "ALL",
+      "createdAt": "2026-10-26T03:10:20.427Z",
+      "updatedAt": "2026-10-26T03:10:20.427Z"
+    },
+    {
+      "id": "demo_coupon_vip5000",
+      "code": "VIP5000",
+      "kind": "FIXED_AMOUNT",
+      "value": 5000,
+      "minOrderAmount": 40000,
+      "maxDiscountAmount": 5000,
+      "startsAt": "2026-10-21T03:10:20.427Z",
+      "endsAt": "2026-11-15T03:10:20.427Z",
+      "usageLimitTotal": 30,
+      "usageLimitPerCustomer": 1,
+      "usedCount": 0,
+      "active": true,
+      "stackableWithPromotions": true,
+      "campaignId": "demo_camp_madre",
+      "appliesTo": "ALL",
+      "createdAt": "2026-10-26T03:10:20.427Z",
+      "updatedAt": "2026-10-26T03:10:20.427Z"
+    }
+  ],
+  "tags": [
+    {
+      "id": "tag_imperdible",
+      "name": "Imperdible",
+      "slug": "imperdible"
+    },
+    {
+      "id": "tag_favorito",
+      "name": "Favorito",
+      "slug": "favorito"
+    },
+    {
+      "id": "tag_nuevo",
+      "name": "Nuevo",
+      "slug": "nuevo"
+    },
+    {
+      "id": "tag_sensual",
+      "name": "Sensual",
+      "slug": "sensual"
+    },
+    {
+      "id": "tag_edicion_limitada",
+      "name": "Edición Limitada",
+      "slug": "edicion-limitada"
+    }
+  ],
+  "collections": [
+    {
+      "id": "coll_regalos_ella",
+      "name": "Regalos para ella",
+      "slug": "regalos-para-ella",
+      "description": "Lencería, prendas seductoras y aromas cautivantes",
+      "active": true,
+      "products": [
+        {
+          "collectionId": "coll_regalos_ella",
+          "productId": "demo_prod_001_baby-doll-venecia",
+          "order": 0
+        },
+        {
+          "collectionId": "coll_regalos_ella",
+          "productId": "demo_prod_002_baby-doll-rose",
+          "order": 1
+        },
+        {
+          "collectionId": "coll_regalos_ella",
+          "productId": "demo_prod_003_vestido-vinilo-verona",
+          "order": 2
+        },
+        {
+          "collectionId": "coll_regalos_ella",
+          "productId": "demo_prod_004_body-marley",
+          "order": 3
+        }
+      ]
+    },
+    {
+      "id": "coll_parejas",
+      "name": "Para parejas",
+      "slug": "para-parejas",
+      "description": "Juegos, geles y cosmética para disfrutar de a dos",
+      "active": true,
+      "products": [
+        {
+          "collectionId": "coll_parejas",
+          "productId": "demo_prod_005_conjunto-hera",
+          "order": 0
+        },
+        {
+          "collectionId": "coll_parejas",
+          "productId": "demo_prod_006_liguero-pandora",
+          "order": 1
+        },
+        {
+          "collectionId": "coll_parejas",
+          "productId": "demo_prod_007_zunga",
+          "order": 2
+        },
+        {
+          "collectionId": "coll_parejas",
+          "productId": "demo_prod_008_fantasia-enfermera-pasionel",
+          "order": 3
+        }
+      ]
+    },
+    {
+      "id": "coll_novedades",
+      "name": "Novedades",
+      "slug": "novedades",
+      "description": "Los últimos ingresos de la temporada",
+      "active": true,
+      "products": [
+        {
+          "collectionId": "coll_novedades",
+          "productId": "demo_prod_009_fantasia-conejita-pasionel",
+          "order": 0
+        },
+        {
+          "collectionId": "coll_novedades",
+          "productId": "demo_prod_010_fantasia-colegiala-ft-ft-03",
+          "order": 1
+        },
+        {
+          "collectionId": "coll_novedades",
+          "productId": "demo_prod_011_catsuit-colegiala",
+          "order": 2
+        },
+        {
+          "collectionId": "coll_novedades",
+          "productId": "demo_prod_012_gel-natural",
+          "order": 3
+        }
+      ]
+    }
+  ],
+  "homeSections": [
+    {
+      "id": "sec_base_01",
+      "campaignId": null,
+      "type": "HERO",
+      "order": 0,
+      "enabled": true,
+      "config": {
+        "headline": "Intimidad, diseño y placer sin tabúes.",
+        "subheadline": "Una selección curada de bienestar íntimo, cosmética sensorial y lencería. Comprá con total reserva desde tu casa: envíos 100% discretos en Córdoba y atención personalizada por WhatsApp.",
+        "ctaText": "Explorar Colección",
+        "ctaLink": "/catalogo"
+      }
+    },
+    {
+      "id": "sec_base_02",
+      "campaignId": null,
+      "type": "CATEGORY_GRID",
+      "order": 1,
+      "enabled": true,
+      "config": {
+        "title": "Categorías de la Colección",
+        "subtitle": "Universo Nocturna"
+      }
+    },
+    {
+      "id": "sec_base_03",
+      "campaignId": null,
+      "type": "PRODUCT_GRID",
+      "order": 2,
+      "enabled": true,
+      "config": {
+        "title": "Seleccionados para Vos",
+        "subtitle": "Curaduría",
+        "limit": 6
+      }
+    },
+    {
+      "id": "sec_base_04",
+      "campaignId": null,
+      "type": "TEXT_BLOCK",
+      "order": 3,
+      "enabled": true,
+      "config": {
+        "title": "Una experiencia íntima pensada desde el respeto, la estética y la confidencialidad.",
+        "id": "nosotros"
+      }
+    },
+    {
+      "id": "sec_base_05",
+      "campaignId": null,
+      "type": "BENEFITS",
+      "order": 4,
+      "enabled": true,
+      "config": {}
+    },
+    {
+      "id": "sec_base_06",
+      "campaignId": null,
+      "type": "FAQ",
+      "order": 5,
+      "enabled": true,
+      "config": {
+        "id": "faq"
+      }
+    },
+    {
+      "id": "sec_bf_01",
+      "campaignId": "demo_camp_blackfriday",
+      "type": "HERO",
+      "order": 0,
+      "enabled": true,
+      "config": {
+        "headline": "BLACK FRIDAY NOCTURNA",
+        "subheadline": "Promociones de temporada en bienestar íntimo y lencería. Envíos 100% discretos en Córdoba.",
+        "ctaText": "Aprovechar Ofertas",
+        "ctaLink": "/campanas/black-friday"
+      }
+    },
+    {
+      "id": "sec_bf_02",
+      "campaignId": "demo_camp_blackfriday",
+      "type": "COUNTDOWN",
+      "order": 1,
+      "enabled": true,
+      "config": {
+        "title": "La campaña de Black Friday finaliza en:",
+        "message": "Promociones válidas por tiempo limitado o hasta agotar stock físico.",
+        "targetDate": "2026-11-02T03:10:20.427Z"
+      }
+    },
+    {
+      "id": "sec_bf_03",
+      "campaignId": "demo_camp_blackfriday",
+      "type": "PRODUCT_GRID",
+      "order": 2,
+      "enabled": true,
+      "config": {
+        "title": "Ofertas Destacadas de Black Friday",
+        "subtitle": "Hasta 30% OFF en productos seleccionados",
+        "filter": "campaign",
+        "limit": 8
+      }
+    },
+    {
+      "id": "sec_bf_04",
+      "campaignId": "demo_camp_blackfriday",
+      "type": "BENEFITS",
+      "order": 3,
+      "enabled": true,
+      "config": {}
+    },
+    {
+      "id": "sec_madre_01",
+      "campaignId": "demo_camp_madre",
+      "type": "CAMPAIGN_BANNER",
+      "order": 0,
+      "enabled": false,
+      "config": {
+        "title": "Especial Día de la Madre",
+        "subtitle": "15% OFF en Lencería y 2x1 en Cosmética íntima con envíos discretos en Córdoba.",
+        "badge": "Campaña Finalizada",
+        "ctaText": "Ver Colección",
+        "ctaLink": "/campanas/dia-de-la-madre"
+      }
+    }
+  ],
+  "couponRedemptions": []
 }

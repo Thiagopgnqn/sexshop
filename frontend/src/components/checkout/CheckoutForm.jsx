@@ -6,12 +6,24 @@ import Input from '../ui/Input';
 import client from '../../api/client';
 import { trackPurchase } from '../../utils/metaPixel';
 import { formatVariantDescription } from '../../context/CartContext';
+import { getStoredUTM } from '../../utils/utmTracker';
 import { FaWhatsapp } from 'react-icons/fa';
-import { FiCheckCircle, FiLock, FiShield, FiTruck, FiMapPin } from 'react-icons/fi';
+import { FiCheckCircle, FiLock, FiShield, FiTruck, FiMapPin, FiPercent } from 'react-icons/fi';
 import themeConfig from '../../config/theme';
 
 const CheckoutForm = ({ onOrderSuccess }) => {
-  const { items, cartTotal, clearCart } = useCart();
+  const {
+    items,
+    cartTotal,
+    clearCart,
+    couponCode,
+    paymentMethod,
+    setPaymentMethod,
+    setDeliveryMethod,
+    transferDiscountPercent,
+    transferDiscountEnabled,
+    storeSettings,
+  } = useCart();
   const { user } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -48,8 +60,12 @@ const CheckoutForm = ({ onOrderSuccess }) => {
     setFormData((prev) => ({
       ...prev,
       deliveryMethod: method,
-      customerAddress: method === 'PICKUP' && !prev.customerAddress ? 'Retiro a coordinar' : prev.customerAddress,
+      customerAddress:
+        method === 'PICKUP' && !prev.customerAddress ? 'Retiro a coordinar' : prev.customerAddress,
     }));
+    if (setDeliveryMethod) {
+      setDeliveryMethod(method);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -97,14 +113,17 @@ const CheckoutForm = ({ onOrderSuccess }) => {
         customerCity: formData.customerCity.trim() || 'Córdoba',
         customerPostalCode: formData.customerPostalCode.trim() || '5000',
         deliveryMethod: formData.deliveryMethod,
+        paymentMethod: paymentMethod || 'TRANSFER',
+        couponCode: couponCode ? couponCode.trim() : undefined,
         comments: formData.comments?.trim() || undefined,
         items: orderItems,
+        ...getStoredUTM(),
       };
 
       const res = await client.post('/orders', orderData);
       const link = res.data?.whatsappLink;
 
-      // Meta Pixel Purchase — estrictamente IDs/SKUs numéricos, sin nombres ni categorías
+      // Meta Pixel Purchase
       trackPurchase({
         orderId: res.data?.id,
         items,
@@ -147,6 +166,16 @@ const CheckoutForm = ({ onOrderSuccess }) => {
         <p className="text-content-secondary mb-6 max-w-sm mx-auto text-xs sm:text-sm leading-relaxed">
           Ya preparamos el resumen de tu pedido. Hacé clic abajo para enviarlo a nuestro WhatsApp y coordinar el pago y la entrega discreta.
         </p>
+
+        {paymentMethod === 'TRANSFER' && (
+          <div className="mb-6 p-3.5 rounded bg-surface-elevated border border-brand-border/30 text-xs text-content-secondary max-w-sm mx-auto text-left">
+            <p className="font-semibold text-content mb-1">Instrucciones de Transferencia bancaria:</p>
+            <p className="leading-relaxed">
+              {storeSettings?.bankTransferInstructions ||
+                'Te enviaremos los datos de CBU y Alias al confirmar el pedido por WhatsApp para abonar con descuento.'}
+            </p>
+          </div>
+        )}
 
         <div className="flex flex-col sm:flex-row justify-center gap-3 max-w-sm mx-auto">
           {whatsappUrl && (
@@ -313,7 +342,63 @@ const CheckoutForm = ({ onOrderSuccess }) => {
         )}
       </div>
 
-      {/* Paso 3: Notas */}
+      {/* Paso 3: Método de Pago */}
+      <div className="pt-2 border-t border-brand-border/15">
+        <div className="pb-3 mb-4 border-b border-brand-border/15">
+          <span className="text-[10px] uppercase tracking-widest text-mauve font-medium">
+            Paso 3
+          </span>
+          <h2 className="font-display text-base uppercase tracking-widest text-content mt-0.5">
+            Método de Pago
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
+          <button
+            type="button"
+            onClick={() => setPaymentMethod('TRANSFER')}
+            className={`p-4 rounded-md border text-left transition-all ${
+              paymentMethod === 'TRANSFER'
+                ? 'bg-brand/40 border-mauve text-content ring-1 ring-mauve/40'
+                : 'bg-canvas border-brand-border/25 text-content-secondary hover:border-mauve/40'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs font-semibold text-content">Transferencia bancaria</span>
+              {transferDiscountEnabled && (
+                <span className="text-[10px] text-emerald-400 font-bold bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/40">
+                  {transferDiscountPercent}% OFF
+                </span>
+              )}
+            </div>
+            <p className="text-[11px] text-content-muted leading-snug">
+              {transferDiscountEnabled
+                ? `Bonificación directa del ${transferDiscountPercent}% sobre el subtotal de productos.`
+                : 'Pago directo mediante transferencia bancaria.'}
+            </p>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setPaymentMethod('OTHER')}
+            className={`p-4 rounded-md border text-left transition-all ${
+              paymentMethod === 'OTHER'
+                ? 'bg-brand/40 border-mauve text-content ring-1 ring-mauve/40'
+                : 'bg-canvas border-brand-border/25 text-content-secondary hover:border-mauve/40'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs font-semibold text-content">Efectivo / Otros Medios</span>
+              <span className="text-[10px] text-content-muted">Precio regular</span>
+            </div>
+            <p className="text-[11px] text-content-muted leading-snug">
+              A coordinar directamente por WhatsApp al momento de la entrega o retiro.
+            </p>
+          </button>
+        </div>
+      </div>
+
+      {/* Paso 4: Notas */}
       <div className="pt-2 border-t border-brand-border/15">
         <label className="block text-xs font-medium text-content-secondary mb-1.5 tracking-wide">
           Indicaciones para la entrega o franja horaria preferida (Opcional)

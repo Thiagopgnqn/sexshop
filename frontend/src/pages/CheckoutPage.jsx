@@ -11,7 +11,16 @@ import themeConfig from '../config/theme';
 import useSEO from '../hooks/useSEO';
 
 const CheckoutPage = () => {
-  const { items, cartTotal, cartCount } = useCart();
+  const {
+    items,
+    cartTotal,
+    cartSubtotal,
+    cartCount,
+    quote,
+    totalSavings,
+    transferDiscountPercent,
+    storeSettings,
+  } = useCart();
   const [orderCompleted, setOrderCompleted] = React.useState(false);
   const navigate = useNavigate();
 
@@ -133,20 +142,84 @@ const CheckoutPage = () => {
                 <div className="flex justify-between text-content-secondary">
                   <dt>Subtotal productos</dt>
                   <dd className="font-semibold text-content">
-                    {themeConfig.brand.currencySymbol}{cartTotal.toLocaleString('es-AR')}
+                    {themeConfig.brand.currencySymbol}
+                    {Number(quote?.subtotal || cartSubtotal).toLocaleString('es-AR')}
                   </dd>
                 </div>
+
+                {quote?.itemDiscountsTotal > 0 && (
+                  <div className="flex justify-between text-emerald-400">
+                    <dt>Descuentos en productos</dt>
+                    <dd className="font-medium">
+                      -{themeConfig.brand.currencySymbol}
+                      {Number(quote.itemDiscountsTotal).toLocaleString('es-AR')}
+                    </dd>
+                  </div>
+                )}
+
+                {Array.isArray(quote?.appliedPromotions) &&
+                  quote.appliedPromotions.map((p) => (
+                    <div key={p.id || p.name} className="flex justify-between text-emerald-400">
+                      <dt className="truncate pr-2">{p.name}</dt>
+                      <dd className="font-medium whitespace-nowrap">
+                        -{themeConfig.brand.currencySymbol}
+                        {Number(p.discount).toLocaleString('es-AR')}
+                      </dd>
+                    </div>
+                  ))}
+
+                {quote?.couponDiscount > 0 && (
+                  <div className="flex justify-between text-emerald-400">
+                    <dt>Cupón ({quote.coupon?.code})</dt>
+                    <dd className="font-medium">
+                      -{themeConfig.brand.currencySymbol}
+                      {Number(quote.couponDiscount).toLocaleString('es-AR')}
+                    </dd>
+                  </div>
+                )}
+
+                {quote?.paymentMethodDiscount > 0 && (
+                  <div className="flex justify-between text-emerald-400">
+                    <dt>Bonificación Transferencia bancaria ({transferDiscountPercent || 10}%)</dt>
+                    <dd className="font-medium">
+                      -{themeConfig.brand.currencySymbol}
+                      {Number(quote.paymentMethodDiscount).toLocaleString('es-AR')}
+                    </dd>
+                  </div>
+                )}
+
                 <div className="flex justify-between text-content-secondary">
-                  <dt>Entrega / Retiro</dt>
-                  <dd className="text-content-secondary font-medium">A coordinar por WhatsApp</dd>
+                  <dt>Envío a domicilio</dt>
+                  <dd className="font-medium text-content">
+                    {quote?.shipping?.isFree ? (
+                      <span className="text-emerald-400 font-semibold uppercase text-[11px]">
+                        ¡Gratis!
+                      </span>
+                    ) : (
+                      `${themeConfig.brand.currencySymbol}${Number(
+                        quote?.shipping?.finalCost || storeSettings?.shippingCost || 4500
+                      ).toLocaleString('es-AR')}`
+                    )}
+                  </dd>
                 </div>
+
                 <div className="flex justify-between items-center text-sm font-medium text-content pt-3 border-t border-brand-border/25">
-                  <dt>Total Estimado</dt>
-                  <dd className="text-lg font-semibold text-content tracking-tight">
-                    {themeConfig.brand.currencySymbol}{cartTotal.toLocaleString('es-AR')}
+                  <dt className="text-base font-semibold">Total Final</dt>
+                  <dd className="text-xl font-bold text-content tracking-tight">
+                    {themeConfig.brand.currencySymbol}
+                    {Number(quote?.total || cartTotal).toLocaleString('es-AR')}
                   </dd>
                 </div>
               </dl>
+
+              {totalSavings > 0 && (
+                <div className="mt-3 p-2 rounded bg-emerald-950/40 border border-emerald-800/40 text-center">
+                  <p className="text-[11px] font-semibold text-emerald-300">
+                    ¡Ahorro total comprobado: {themeConfig.brand.currencySymbol}
+                    {Number(totalSavings).toLocaleString('es-AR')}!
+                  </p>
+                </div>
+              )}
 
               {/* Avisos de discreción y política de cambios */}
               <div className="mt-5 p-3.5 rounded bg-surface-elevated/70 border border-brand-border/25 text-xs text-content-secondary space-y-2 leading-relaxed">

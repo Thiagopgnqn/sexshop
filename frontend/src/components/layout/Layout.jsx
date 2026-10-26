@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
+import AnnouncementBar from './AnnouncementBar';
 import AgeGateModal, { isAgeVerifiedInStorage } from './AgeGateModal';
 import ErrorBoundary from './ErrorBoundary';
 import DemoBanner from './DemoBanner';
@@ -32,6 +33,7 @@ const Layout = () => {
         isDemoMode() ? 'pb-16 sm:pb-12' : ''
       }`}
     >
+      <AnnouncementBar />
       <Header />
       <main className="flex-grow">
         <ErrorBoundary resetKey={location.pathname + location.search}>

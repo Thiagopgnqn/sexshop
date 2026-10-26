@@ -25,6 +25,7 @@ const CatalogPage = () => {
     if (searchParams.get('minPrice')) init.minPrice = searchParams.get('minPrice');
     if (searchParams.get('maxPrice')) init.maxPrice = searchParams.get('maxPrice');
     if (searchParams.get('sort')) init.sort = searchParams.get('sort');
+    if (searchParams.get('onlyOffers') === 'true') init.onlyOffers = 'true';
     if (searchParams.get('page')) init.page = Number(searchParams.get('page'));
     return init;
   });
@@ -33,11 +34,17 @@ const CatalogPage = () => {
   useEffect(() => {
     const urlCategory = searchParams.get('category') || undefined;
     const urlSubcategory = searchParams.get('subcategory') || undefined;
-    if (urlCategory !== filters.category || urlSubcategory !== filters.subcategory) {
+    const urlOnlyOffers = searchParams.get('onlyOffers') === 'true' ? 'true' : undefined;
+    if (
+      urlCategory !== filters.category ||
+      urlSubcategory !== filters.subcategory ||
+      urlOnlyOffers !== filters.onlyOffers
+    ) {
       setFilters((prev) => ({
         ...prev,
         category: urlCategory,
         subcategory: urlSubcategory,
+        onlyOffers: urlOnlyOffers,
         page: 1,
       }));
     }
@@ -51,11 +58,14 @@ const CatalogPage = () => {
   useSEO({
     title: formattedCategory
       ? `${formattedCategory} — Catálogo | ${themeConfig.brand.name}`
+      : filters.onlyOffers === 'true'
+      ? `Ofertas y Promociones | ${themeConfig.brand.name}`
       : `Catálogo Completo | ${themeConfig.brand.name}`,
     description: `Explorá nuestra colección de ${formattedCategory || 'bienestar íntimo, lencería y cosmética sensorial'} en Córdoba. Envíos 100% discretos y atención confidencial.`,
   });
 
   const activeFiltersCount =
+    (filters.onlyOffers ? 1 : 0) +
     (filters.category ? 1 : 0) +
     (filters.subcategory ? 1 : 0) +
     (filters.size ? 1 : 0) +
@@ -148,6 +158,7 @@ const CatalogPage = () => {
                 }
               >
                 <option value="">Ordenar: Destacados</option>
+                <option value="discount_desc">Mayor Descuento</option>
                 <option value="price_asc">Precio: Menor a Mayor</option>
                 <option value="price_desc">Precio: Mayor a Menor</option>
                 <option value="newest">Novedades</option>
@@ -161,6 +172,19 @@ const CatalogPage = () => {
         {(activeFiltersCount > 0 || filters.search) && (
           <div className="flex flex-wrap items-center gap-1.5 mt-4 pt-3 border-t border-brand-border/15">
             <span className="text-xs text-content-muted mr-1">Filtros activos:</span>
+
+            {filters.onlyOffers && (
+              <span className="inline-flex items-center text-xs bg-brand text-content px-2.5 py-1 rounded border border-mauve/40">
+                Solo ofertas
+                <button
+                  type="button"
+                  onClick={() => removeFilterKey('onlyOffers')}
+                  className="ml-1.5 text-content/70 hover:text-content"
+                >
+                  <FiX size={11} />
+                </button>
+              </span>
+            )}
 
             {filters.category && (
               <span className="inline-flex items-center text-xs bg-surface-elevated text-content px-2.5 py-1 rounded border border-brand-border/25">

@@ -2,15 +2,66 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Tokens de color (canales RGB para que Tailwind soporte /opacidad).
+ * Tienda pública: nocturna, profunda, pero con superficies y textos
+ * secundarios un punto más claros para que la lectura no canse.
+ */
 :root {
-  --color-bg: #0F0A0A;
-  --color-surface: #1A1212;
-  --color-surface-elevated: #2B1917;
-  --color-brand: #5A2A2E;
-  --color-mauve: #907878;
-  --color-text-main: #F2EDE8;
-  --color-text-secondary: #B8ABA6;
+  --c-canvas: 15 10 10;            /* #0F0A0A */
+  --c-surface: 29 21 21;           /* #1D1515 */
+  --c-surface-elevated: 46 32 31;  /* #2E201F */
+  --c-surface-hover: 38 27 26;     /* #261B1A */
+  --c-surface-subtle: 22 16 16;    /* #161010 */
+  --c-brand: 90 42 46;             /* #5A2A2E */
+  --c-brand-hover: 110 53 58;      /* #6E353A */
+  --c-mauve: 160 134 134;          /* #A08686 */
+  --c-mauve-light: 196 182 177;    /* #C4B6B1 */
+  --c-line: 160 134 134;           /* bordes */
+  --c-content: 242 237 232;        /* #F2EDE8 */
+  --c-content-secondary: 204 193 188; /* #CCC1BC */
+  --c-content-muted: 170 155 151;  /* #AA9B97 */
+  --c-content-subtle: 144 120 120; /* #907878 */
+
+  --color-bg: rgb(var(--c-canvas));
+  --color-surface: rgb(var(--c-surface));
+  --color-surface-elevated: rgb(var(--c-surface-elevated));
+  --color-brand: rgb(var(--c-brand));
+  --color-mauve: rgb(var(--c-mauve));
+  --color-text-main: rgb(var(--c-content));
+  --color-text-secondary: rgb(var(--c-content-secondary));
 }
+
+/*
+ * Panel de administración: misma paleta bordó/malva pero en un "carbón cálido"
+ * más claro y con menos contraste extremo, pensado para muchas horas de uso.
+ */
+.theme-admin {
+  --c-canvas: 30 25 26;            /* #1E191A */
+  --c-surface: 40 33 34;           /* #282122 */
+  --c-surface-elevated: 53 44 45;  /* #352C2D */
+  --c-surface-hover: 47 39 40;     /* #2F2728 */
+  --c-surface-subtle: 35 29 30;    /* #231D1E */
+  --c-brand: 116 56 62;            /* #74383E */
+  --c-brand-hover: 134 66 72;      /* #864248 */
+  --c-mauve: 190 162 160;          /* #BEA2A0 */
+  --c-mauve-light: 214 200 196;    /* #D6C8C4 */
+  --c-line: 190 168 164;
+  --c-content: 243 239 235;        /* #F3EFEB */
+  --c-content-secondary: 212 202 198; /* #D4CAC6 */
+  --c-content-muted: 178 165 161;  /* #B2A5A1 */
+  --c-content-subtle: 150 132 130;
+
+  background-color: rgb(var(--c-canvas));
+  color: rgb(var(--c-content));
+  font-size: 15px;
+}
+
+/* En el admin los micro-textos (10–11px) se vuelven ilegibles: se suben un punto */
+.theme-admin .text-\[9px\] { font-size: 10.5px; }
+.theme-admin .text-\[10px\] { font-size: 11.5px; }
+.theme-admin .text-\[11px\] { font-size: 12.5px; }
+.theme-admin .text-xs { font-size: 13px; line-height: 1.15rem; }
 
 @layer base {
   html {
@@ -59,7 +110,7 @@
 
 .nocturna-silk-card,
 .smoke-card-texture {
-  background-color: #1A1212;
+  background-color: rgb(var(--c-surface));
   background-image:
     radial-gradient(circle at 82% 18%, rgba(90, 42, 46, 0.28) 0%, transparent 58%),
     radial-gradient(circle at 18% 82%, rgba(43, 25, 23, 0.55) 0%, transparent 62%),
@@ -110,16 +161,16 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #0F0A0A;
+  background: rgb(var(--c-canvas));
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2B1917;
+  background: rgb(var(--c-surface-elevated));
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #5A2A2E;
+  background: rgb(var(--c-brand));
 }
 
 .transition-smooth {

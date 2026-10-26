@@ -1,10 +1,14 @@
 /**
  * Integración con Píxel de Meta — Modo Privacidad Estricta (Nocturna SexShop)
  *
- * Reglas:
- * 1. Si VITE_META_PIXEL_ID no está definido en variables de entorno, NO carga el script ni emite eventos.
- * 2. NINGÚN evento envía content_name, descripciones ni nombres de categoría.
- * 3. Únicamente se envían identificadores (SKU o ID) en content_ids, content_type, value, currency y num_items.
+ * REGLAS OBLIGATORIAS:
+ * 1. En modo demo (VITE_DEMO_MODE=true) o si VITE_META_PIXEL_ID no está definido:
+ *    EL PÍXEL SE ENCUENTRA COMPLETAMENTE DESACTIVADO.
+ * 2. PRIVACIDAD ESTRICTA: NINGÚN evento envía nombres de productos, categorías,
+ *    marcas ni títulos de campañas en texto.
+ * 3. Identificadores: solo IDs/SKUs en content_ids, content_type: 'product',
+ *    y si hay campaña asociada solo se envía el ID numérico como parámetro (campaign_id).
+ * 4. Valor (value): siempre es el precio final real que paga el cliente en Pesos Argentinos (ARS).
  */
 
 import { isDemoMode } from '../api/demo/demoAdapter';
@@ -17,24 +21,22 @@ export const initMetaPixel = () => {
   if (isDemoMode() || !PIXEL_ID || typeof window === 'undefined' || initialized) return;
   initialized = true;
 
-  /* eslint-disable */
-  !(function (f, b, e, v, n, t, s) {
+  (function (f, b, e, v, n, t, s) {
     if (f.fbq) return;
     n = f.fbq = function () {
       n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
     };
     if (!f._fbq) f._fbq = n;
     n.push = n;
-    n.loaded = !0;
+    n.loaded = true;
     n.version = '2.0';
     n.queue = [];
     t = b.createElement(e);
-    t.async = !0;
+    t.async = true;
     t.src = v;
     s = b.getElementsByTagName(e)[0];
     s.parentNode.insertBefore(t, s);
   })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
-  /* eslint-enable */
 
   window.fbq('init', PIXEL_ID);
   window.fbq('track', 'PageView');
@@ -54,7 +56,7 @@ export const trackViewContent = ({ id, sku, price } = {}) => {
   safeTrack('ViewContent', {
     content_ids: [cleanId],
     content_type: 'product',
-    value: Number(price || 0),
+    value: Math.round(Number(price || 0)),
     currency: 'ARS',
   });
 };
@@ -66,7 +68,7 @@ export const trackAddToCart = ({ id, sku, price, quantity = 1 } = {}) => {
   safeTrack('AddToCart', {
     content_ids: [cleanId],
     content_type: 'product',
-    value: Number(price || 0) * Number(quantity || 1),
+    value: Math.round(Number(price || 0) * Number(quantity || 1)),
     currency: 'ARS',
     num_items: Number(quantity || 1),
   });
@@ -80,6 +82,8 @@ const normalizeCheckoutArgs = (arg1, arg2) => {
     return {
       items: Array.isArray(arg1.items) ? arg1.items : [],
       total: Number(arg1.total || 0),
+      orderId: arg1.orderId,
+      campaignId: arg1.campaignId,
     };
   }
   return { items: [], total: 0 };
@@ -104,14 +108,14 @@ export const trackInitiateCheckout = (arg1, arg2) => {
   safeTrack('InitiateCheckout', {
     content_ids: contentIds,
     content_type: 'product',
-    value: total,
+    value: Math.round(Number(total || 0)),
     currency: 'ARS',
     num_items: numItems,
   });
 };
 
 export const trackPurchase = (arg1, arg2) => {
-  const { items, total } = normalizeCheckoutArgs(arg1, arg2);
+  const { items, total, campaignId } = normalizeCheckoutArgs(arg1, arg2);
   const contentIds = items
     .map((item) =>
       String(
@@ -126,11 +130,21 @@ export const trackPurchase = (arg1, arg2) => {
 
   const numItems = items.reduce((sum, item) => sum + Number(item.quantity || 1), 0);
 
-  safeTrack('Purchase', {
+  const params = {
     content_ids: contentIds,
     content_type: 'product',
-    value: total,
+    value: Math.round(Number(total || 0)),
     currency: 'ARS',
     num_items: numItems,
-  });
+  };
+
+  // Solo ID numérico de campaña si existe, jamás el nombre textual
+  if (campaignId) {
+    const numericId = parseInt(String(campaignId).replace(/\D/g, ''), 10);
+    if (!isNaN(numericId) && numericId > 0) {
+      params.campaign_id = numericId;
+    }
+  }
+
+  safeTrack('Purchase', params);
 };

@@ -80,6 +80,8 @@ const ProductForm = ({ initialData, categories: propCategories = [], onSubmit, l
   const [categories, setCategories] = useState(() =>
     flattenCategoriesList(propCategories)
   );
+  const [availableTags, setAvailableTags] = useState([]);
+  const [selectedTagIds, setSelectedTagIds] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     sku: '',
@@ -118,6 +120,18 @@ const ProductForm = ({ initialData, categories: propCategories = [], onSubmit, l
     fetchCategories();
   }, [propCategories]);
 
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const res = await client.get('/tags');
+        setAvailableTags(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
+        console.error('Error loading tags in ProductForm:', err);
+      }
+    };
+    fetchTags();
+  }, []);
+
   // Populate form when initialData changes
   useEffect(() => {
     if (initialData) {
@@ -125,6 +139,22 @@ const ProductForm = ({ initialData, categories: propCategories = [], onSubmit, l
         initialData,
         categories
       );
+
+      // Extract existing tags
+      const currentTags = [];
+      if (Array.isArray(initialData.tags)) {
+        initialData.tags.forEach((t) => {
+          if (typeof t === 'string') currentTags.push(t);
+          else if (t?.id) currentTags.push(t.id);
+        });
+      }
+      if (Array.isArray(initialData.productTags)) {
+        initialData.productTags.forEach((pt) => {
+          if (pt.tagId) currentTags.push(pt.tagId);
+          else if (pt.tag?.id) currentTags.push(pt.tag.id);
+        });
+      }
+      setSelectedTagIds(Array.from(new Set(currentTags)));
 
       setFormData({
         name: initialData.name || '',
@@ -180,9 +210,15 @@ const ProductForm = ({ initialData, categories: propCategories = [], onSubmit, l
       });
       setUploadError('');
       setShowUrlInput(false);
+      setSelectedTagIds([]);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialData]);
+      }, [initialData]);
+
+  const toggleTag = (tagId) => {
+    setSelectedTagIds((prev) =>
+      prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]
+    );
+  };
 
   // Backfill parentCategoryId / subcategoryId if categories loaded after initialData
   useEffect(() => {
@@ -373,6 +409,7 @@ const ProductForm = ({ initialData, categories: propCategories = [], onSubmit, l
       imageUrl: formData.imageUrl ? formData.imageUrl.trim() : null,
       active: Boolean(formData.active),
       variants: cleanedVariants,
+      tagIds: selectedTagIds,
     };
 
     onSubmit(payload);
@@ -465,6 +502,45 @@ const ProductForm = ({ initialData, categories: propCategories = [], onSubmit, l
           placeholder="Ej: Nuevo / Destacado"
         />
       </div>
+
+      {/* Etiquetas / Tags de Catálogo */}
+      {availableTags.length > 0 && (
+        <div className="space-y-1.5">
+          <label className="block text-xs font-medium text-content-secondary tracking-wide">
+            Etiquetas del Catálogo (Tags)
+          </label>
+          <div className="flex flex-wrap gap-2 p-2.5 bg-surface-elevated rounded-md border border-brand-border/25">
+            {availableTags.map((tag) => {
+              const isSelected = selectedTagIds.includes(tag.id);
+              const tagColor = tag.color || '#907878';
+              return (
+                <button
+                  key={tag.id}
+                  type="button"
+                  onClick={() => toggleTag(tag.id)}
+                  className={`text-xs px-2.5 py-1 rounded-full border transition-all inline-flex items-center space-x-1.5 ${
+                    isSelected
+                      ? 'border-mauve text-content font-medium ring-1 ring-mauve/40'
+                      : 'border-brand-border/30 text-content-secondary hover:text-content opacity-75 hover:opacity-100'
+                  }`}
+                  style={{
+                    backgroundColor: isSelected ? `${tagColor}40` : `${tagColor}15`,
+                  }}
+                >
+                  <span
+                    className="h-2 w-2 rounded-full shrink-0"
+                    style={{ backgroundColor: tagColor }}
+                  />
+                  <span>{tag.name}</span>
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-[10px] text-content-muted">
+            Hacé clic en una o más etiquetas para asignarlas a este producto.
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
         <Input

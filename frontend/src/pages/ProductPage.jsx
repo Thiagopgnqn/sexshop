@@ -7,6 +7,7 @@ import Button from '../components/ui/Button';
 import Spinner from '../components/ui/Spinner';
 import Badge from '../components/ui/Badge';
 import ProductPlaceholder from '../components/ui/ProductPlaceholder';
+import ProductCard from '../components/catalog/ProductCard';
 import { trackViewContent } from '../utils/metaPixel';
 import { formatVariantDescription } from '../context/CartContext';
 import { resolveProductImage } from '../utils/productImages';
@@ -20,6 +21,9 @@ import {
   FiMinus,
   FiPlus,
   FiMessageCircle,
+  FiTag,
+  FiPackage,
+  FiCheck,
 } from 'react-icons/fi';
 import themeConfig from '../config/theme';
 
@@ -33,6 +37,8 @@ const ProductPage = () => {
   const [activeGalleryIdx, setActiveGalleryIdx] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [openTab, setOpenTab] = useState('shipping');
+  const [relatedProducts, setRelatedProducts] = useState([]);
+  const [comboAdded, setComboAdded] = useState(false);
   const { addToCart } = useCart();
 
   useEffect(() => {
@@ -47,6 +53,18 @@ const ProductPage = () => {
           setSelectedVariantId(inStockVar.id);
         } else {
           setSelectedVariantId(null);
+        }
+
+        // Cargar productos relacionados ("Combina con")
+        const catId = res.data.categoryId || res.data.category?.id;
+        if (catId) {
+          client
+            .get(`/products?category=${catId}&limit=4`)
+            .then((relRes) => {
+              const list = (relRes.data?.products || []).filter((p) => p.id !== res.data.id);
+              setRelatedProducts(list.slice(0, 3));
+            })
+            .catch(() => {});
         }
       } catch (err) {
         setError('Artículo no encontrado');
@@ -67,13 +85,34 @@ const ProductPage = () => {
     [activeVariants, selectedVariantId]
   );
 
-  const activePrice = selectedVariant?.price != null
-    ? Number(selectedVariant.price)
-    : Number(product?.price || 0);
+  // Cotización dinámica según variante seleccionada
+  const activePricing = selectedVariant?.pricing || product?.pricing || null;
+  const activePrice =
+    activePricing?.finalPrice != null
+      ? Number(activePricing.finalPrice)
+      : selectedVariant?.price != null
+      ? Number(selectedVariant.price)
+      : Number(product?.price || 0);
+
+  const activeCompareAtPrice =
+    activePricing?.compareAtPrice != null ? Number(activePricing.compareAtPrice) : null;
+
+  const activeSavings =
+    activePricing?.savingsAmount != null ? Number(activePricing.savingsAmount) : 0;
+
+  const activeDiscountPercent =
+    activePricing?.discountPercent != null ? Number(activePricing.discountPercent) : 0;
+
+  const activePromoLabel = activePricing?.promotionLabel || null;
+
   const activeStock = selectedVariant
     ? Number(selectedVariant.stock ?? 0)
     : Number(product?.stock ?? 0);
   const activeSku = selectedVariant?.sku || product?.sku;
+
+  const transferPrice = product?.transferPrice
+    ? Number(product.transferPrice)
+    : Math.round(activePrice * 0.9);
 
   // Meta Pixel ViewContent — estrictamente ID/SKU y valor, NUNCA content_name ni categoría
   useEffect(() => {
@@ -288,41 +327,70 @@ const ProductPage = () => {
               {product.name}
             </h1>
 
-            {/* Precio y Disponibilidad */}
-            <div className="flex items-baseline justify-between py-4 my-3 border-y border-brand-border/15">
-              <div>
-                <span className="text-2xl sm:text-3xl font-semibold text-content tracking-tight">
-                  {themeConfig.brand.currencySymbol}{priceFormatted}
-                </span>
+            {/* Precio, Disponibilidad y Ahorro */}
+            <div className="py-4 my-3 border-y border-brand-border/15">
+              <div className="flex items-baseline justify-between flex-wrap gap-2">
+                <div className="flex items-baseline flex-wrap gap-x-3">
+                  <span className="text-2xl sm:text-3xl font-bold text-content tracking-tight">
+                    {themeConfig.brand.currencySymbol}{priceFormatted}
+                  </span>
+
+                  {/* REGLA LEGAL: Solo mostrar precio tachado si compareAtPrice fue verificado en PriceHistory */}
+                  {activeCompareAtPrice != null && activeCompareAtPrice > activePrice && (
+                    <span className="text-base sm:text-lg text-content-muted line-through">
+                      {themeConfig.brand.currencySymbol}
+                      {activeCompareAtPrice.toLocaleString('es-AR')}
+                    </span>
+                  )}
+
+                  {activeDiscountPercent > 0 && (
+                    <Badge variant="brand">{activeDiscountPercent}% OFF</Badge>
+                  )}
+                </div>
+
+                <div>
+                  {activeStock > 0 ? (
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-300 bg-emerald-950/50 border border-emerald-800/40 px-2.5 py-1 rounded">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                      <span>Disponible ({activeStock} un.)</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center text-xs font-medium text-content-secondary bg-surface-elevated border border-brand-border/30 px-2.5 py-1 rounded">
+                      Sin stock inmediato
+                    </span>
+                  )}
+                </div>
               </div>
 
-              <div>
-                {activeStock > 0 ? (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-300 bg-emerald-950/50 border border-emerald-800/40 px-2.5 py-1 rounded">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                    <span>Disponible ({activeStock} un.)</span>
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center text-xs font-medium text-content-secondary bg-surface-elevated border border-brand-border/30 px-2.5 py-1 rounded">
-                    Sin stock inmediato
-                  </span>
-                )}
-              </div>
+              {/* Ahorro comprobado */}
+              {activeCompareAtPrice != null && activeSavings > 0 && (
+                <p className="text-xs text-emerald-400 font-medium mt-1.5">
+                  Ahorrás {themeConfig.brand.currencySymbol}{activeSavings.toLocaleString('es-AR')}
+                  {activePromoLabel && (
+                    <span className="text-content-muted font-normal ml-1">({activePromoLabel})</span>
+                  )}
+                </p>
+              )}
+
+              {/* Promo activa sin precio anterior comprobado (honesta) */}
+              {activeCompareAtPrice == null && activePromoLabel && (
+                <p className="text-xs text-mauve font-medium mt-1.5">
+                  Promoción vigente: {activePromoLabel}
+                </p>
+              )}
             </div>
 
             {/* Precio por transferencia */}
-            {product.transferPrice && (
-              <div className="mb-6 p-3.5 rounded-md bg-surface-elevated/70 border border-brand-border/25 flex items-center justify-between text-xs">
-                <div>
-                  <p className="font-medium text-content">Precio con transferencia:</p>
-                  <p className="text-content-muted">Bonificación coordinando por WhatsApp</p>
-                </div>
-                <span className="text-base font-semibold text-emerald-300">
-                  {themeConfig.brand.currencySymbol}
-                  {Number(product.transferPrice).toLocaleString('es-AR')}
-                </span>
+            <div className="mb-6 p-3.5 rounded-md bg-surface-elevated/70 border border-brand-border/25 flex items-center justify-between text-xs">
+              <div>
+                <p className="font-medium text-content">Precio con transferencia (10% OFF):</p>
+                <p className="text-content-muted">Bonificación directa coordinando por WhatsApp</p>
               </div>
-            )}
+              <span className="text-base font-semibold text-emerald-300">
+                {themeConfig.brand.currencySymbol}
+                {transferPrice.toLocaleString('es-AR')}
+              </span>
+            </div>
 
             {/* Selector de Variantes (Tipo, Talle, Color, Sabor/Aroma, Volumen) */}
             {activeVariants.length > 0 && (
@@ -335,9 +403,13 @@ const ProductPage = () => {
                     const isSelected = variant.id === selectedVariantId;
                     const label =
                       formatVariantDescription(variant) || `Opción ${variant.sku}`;
-                    const varPrice = Number(variant.price || product.price).toLocaleString(
-                      'es-AR'
-                    );
+                    const varFinalPrice =
+                      variant.pricing?.finalPrice != null
+                        ? Number(variant.pricing.finalPrice)
+                        : Number(variant.price || product.price);
+                    const varPriceFormatted = varFinalPrice.toLocaleString('es-AR');
+                    const varDiscount = variant.pricing?.discountPercent || 0;
+
                     return (
                       <button
                         key={variant.id}
@@ -357,12 +429,53 @@ const ProductPage = () => {
                               : 'Consultar stock'}
                           </p>
                         </div>
-                        <span className="text-xs font-semibold text-content whitespace-nowrap">
-                          {themeConfig.brand.currencySymbol}{varPrice}
-                        </span>
+                        <div className="text-right whitespace-nowrap">
+                          <span className="text-xs font-semibold text-content block">
+                            {themeConfig.brand.currencySymbol}{varPriceFormatted}
+                          </span>
+                          {varDiscount > 0 && (
+                            <span className="text-[10px] text-mauve font-medium">
+                              {varDiscount}% OFF
+                            </span>
+                          )}
+                        </div>
                       </button>
                     );
                   })}
+                </div>
+              </div>
+            )}
+
+            {/* Condiciones de la Promoción Visible */}
+            {product.activePromotions && product.activePromotions.length > 0 && (
+              <div className="mb-6 p-4 rounded-lg bg-canvas border border-brand-border/30 space-y-2">
+                <div className="flex items-center gap-2 text-mauve">
+                  <FiTag className="text-sm" />
+                  <h4 className="text-xs font-display uppercase tracking-wider text-content">
+                    Condiciones de Promociones Aplicables
+                  </h4>
+                </div>
+                <div className="space-y-2 text-xs">
+                  {product.activePromotions.map((promo) => (
+                    <div
+                      key={promo.id}
+                      className="border-l-2 border-mauve pl-3 py-1 bg-surface/50 rounded-r"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-content">{promo.name}</span>
+                        {promo.badgeLabel && (
+                          <Badge variant="brand">{promo.badgeLabel}</Badge>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-content-muted mt-0.5">
+                        • {promo.conditions?.stockNotice || 'Hasta agotar stock disponible'}
+                        {promo.conditions?.minQuantity &&
+                          ` • Mínimo ${promo.conditions.minQuantity} un.`}
+                        {promo.conditions?.maxDiscountAmount &&
+                          ` • Reintegro máx. $${Number(promo.conditions.maxDiscountAmount).toLocaleString('es-AR')}`}
+                      </p>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -467,6 +580,111 @@ const ProductPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Bloque Comprá Junto y Ahorrá (Combos) */}
+      {product.comboPromotions && product.comboPromotions.length > 0 && (
+        <div className="mt-14 p-6 sm:p-8 rounded-xl bg-surface border border-mauve/40 relative overflow-hidden">
+          <div className="flex items-center gap-2 mb-4">
+            <Badge variant="brand">Combo Especial</Badge>
+            <h3 className="font-display text-base sm:text-lg uppercase tracking-wider text-content">
+              Comprá junto y ahorrá
+            </h3>
+          </div>
+
+          {product.comboPromotions.map((combo) => (
+            <div key={combo.id} className="space-y-4">
+              <p className="text-xs text-content-secondary leading-relaxed">
+                Aprovechá la promoción <strong className="text-content">{combo.name}</strong> llevando los productos sugeridos en un solo combo con descuento directo.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pt-2">
+                {combo.items?.map((cItem) => (
+                  <div
+                    key={cItem.id}
+                    className="flex items-center gap-3 p-3 rounded-lg bg-canvas border border-brand-border/20"
+                  >
+                    <div className="w-14 h-14 rounded bg-surface overflow-hidden flex-shrink-0">
+                      <img
+                        src={cItem.imageUrl || '/brand/instagram-profile.jpg'}
+                        alt={cItem.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-content truncate">{cItem.name}</p>
+                      <p className="text-[11px] text-content-muted">
+                        {themeConfig.brand.currencySymbol}
+                        {Number(cItem.price || 0).toLocaleString('es-AR')}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="pt-4 border-t border-brand-border/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-xs text-content-muted line-through">
+                      {themeConfig.brand.currencySymbol}
+                      {combo.regularTotal.toLocaleString('es-AR')}
+                    </span>
+                    <span className="text-xl sm:text-2xl font-bold text-content">
+                      {themeConfig.brand.currencySymbol}
+                      {combo.bundlePrice.toLocaleString('es-AR')}
+                    </span>
+                  </div>
+                  <p className="text-xs text-emerald-400 font-medium">
+                    ¡Ahorrás {themeConfig.brand.currencySymbol}
+                    {combo.savings.toLocaleString('es-AR')} llevando el combo!
+                  </p>
+                </div>
+
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    (combo.items || []).forEach((cItem) => addToCart(cItem, 1));
+                    setComboAdded(true);
+                    setTimeout(() => setComboAdded(false), 3000);
+                  }}
+                  className="text-xs sm:text-sm"
+                >
+                  {comboAdded ? (
+                    <>
+                      <FiCheck className="mr-1.5" />
+                      <span>¡Combo Agregado!</span>
+                    </>
+                  ) : (
+                    <>
+                      <FiShoppingBag className="mr-1.5" />
+                      <span>Agregar Combo al Carrito</span>
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Bloque Combina con (Productos Relacionados) */}
+      {relatedProducts.length > 0 && (
+        <div className="mt-16 pt-10 border-t border-brand-border/20">
+          <div className="mb-6">
+            <span className="text-[11px] uppercase tracking-widest text-mauve font-medium">
+              Recomendaciones Privadas
+            </span>
+            <h3 className="font-display text-xl sm:text-2xl font-light uppercase tracking-wider text-content mt-1">
+              Combina con
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {relatedProducts.map((relProd) => (
+              <ProductCard key={relProd.id} product={relProd} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -8,35 +8,46 @@ import { formatVariantDescription } from '../../context/CartContext';
 import { resolveProductImage } from '../../utils/productImages';
 
 const CartItem = ({ item }) => {
-  const { updateQuantity, removeFromCart } = useCart();
+  const { updateQuantity, removeFromCart, quote } = useCart();
   const { product, variant, quantity } = item;
   const [imgError, setImgError] = useState(false);
 
   const productId = product._id || product.id;
   const variantId = variant?.id || null;
   const maxStock = variant ? Number(variant.stock ?? 0) : Number(product.stock ?? 0);
-  const unitPrice = variant?.price != null ? Number(variant.price) : Number(product.price || 0);
   const variantLabel = item.variantDescription || formatVariantDescription(variant);
   const resolvedImg = resolveProductImage(product, variant);
   const imageUrl = resolvedImg?.thumb || resolvedImg?.main || null;
 
-  useEffect(() => {
-    setImgError(false);
-  }, [imageUrl]);
+  // Buscar ítem cotizado en la respuesta centralizada de /cart/quote
+  const quotedItem = (quote?.items || []).find((qi) => {
+    const pMatch = String(qi.productId) === String(productId);
+    const vMatch = variantId ? String(qi.variantId) === String(variantId) : !qi.variantId;
+    return pMatch && vMatch;
+  });
 
-  const handleDecrease = () => {
-    if (quantity > 1) {
-      updateQuantity(productId, quantity - 1, variantId);
-    }
-  };
+  const baseUnitPrice = variant?.price != null ? Number(variant.price) : Number(product.price || 0);
+  const effectiveUnitPrice = quotedItem ? quotedItem.unitPrice : baseUnitPrice;
+  const originalUnitPrice = quotedItem ? quotedItem.originalUnitPrice : baseUnitPrice;
+  const discountPerUnit = quotedItem ? quotedItem.discountAmount : Math.max(0, originalUnitPrice - effectiveUnitPrice);
+
+  const itemSubtotal = (effectiveUnitPrice * quantity).toLocaleString('es-AR');
+  const originalSubtotal = (originalUnitPrice * quantity).toLocaleString('es-AR');
+  const totalItemSavings = (discountPerUnit * quantity).toLocaleString('es-AR');
 
   const handleIncrease = () => {
     if (quantity < maxStock) {
-      updateQuantity(productId, quantity + 1, variantId);
+      updateQuantity(productId, variantId, quantity + 1);
     }
   };
 
-  const unitTotal = (unitPrice * quantity).toLocaleString('es-AR');
+  const handleDecrease = () => {
+    if (quantity > 1) {
+      updateQuantity(productId, variantId, quantity - 1);
+    } else {
+      removeFromCart(productId, variantId);
+    }
+  };
 
   return (
     <div className="flex py-5 gap-4 border-b border-brand-border/15 items-center">
@@ -82,9 +93,21 @@ const CartItem = ({ item }) => {
               )}
             </div>
 
-            <p className="font-semibold text-content text-sm whitespace-nowrap ml-2">
-              {themeConfig.brand.currencySymbol}{unitTotal}
-            </p>
+            <div className="text-right ml-2 whitespace-nowrap">
+              <p className="font-semibold text-content text-sm">
+                {themeConfig.brand.currencySymbol}{itemSubtotal}
+              </p>
+              {discountPerUnit > 0 && (
+                <>
+                  <p className="text-[10px] text-content-muted line-through">
+                    {themeConfig.brand.currencySymbol}{originalSubtotal}
+                  </p>
+                  <span className="text-[10px] text-emerald-400 font-medium block">
+                    Ahorrás {themeConfig.brand.currencySymbol}{totalItemSavings}
+                  </span>
+                </>
+              )}
+            </div>
           </div>
         </div>
 

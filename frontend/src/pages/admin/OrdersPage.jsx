@@ -838,31 +838,129 @@ const OrdersPage = () => {
                 Artículos del Pedido
               </h4>
               <div className="border border-brand-border/20 rounded-md overflow-hidden divide-y divide-brand-border/15 bg-canvas">
-                {selectedOrder.items?.map((item, idx) => (
-                  <div key={idx} className="p-3 flex items-center justify-between text-xs">
-                    <div>
-                      {item.product?.sku && (
-                        <span className="font-mono text-[10px] text-content-muted mr-1.5">
-                          [{item.product.sku}]
+                {selectedOrder.items?.map((item, idx) => {
+                  const origPrice = Number(item.originalUnitPrice || item.price || item.product?.price || 0);
+                  const effectivePrice = Number(item.unitPrice || item.price || item.product?.price || 0);
+                  const discountPerUnit = Number(item.discountAmount || 0);
+                  const hasDiscount = discountPerUnit > 0 || origPrice > effectivePrice;
+
+                  return (
+                    <div key={idx} className="p-3 flex items-center justify-between text-xs">
+                      <div className="min-w-0 pr-3">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {item.product?.sku && (
+                            <span className="font-mono text-[10px] text-content-muted">
+                              [{item.product.sku}]
+                            </span>
+                          )}
+                          <span className="font-medium text-content">
+                            {item.product?.name || item.name || 'Producto'}
+                          </span>
+                          {item.variantDescription && (
+                            <span className="text-mauve text-[11px]">
+                              ({item.variantDescription})
+                            </span>
+                          )}
+                          <span className="text-content-muted">x {item.quantity} un.</span>
+                        </div>
+
+                        {/* Etiquetas de promoción o campaña asociada */}
+                        {(item.promotion || item.campaign || item.promotionId) && (
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-brand/50 text-mauve border border-mauve/30">
+                              {item.promotion?.name || 'Promoción aplicada'}
+                            </span>
+                            {item.campaign?.name && (
+                              <span className="text-[10px] text-content-muted">
+                                Campaña: {item.campaign.name}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="text-right whitespace-nowrap">
+                        <span className="font-semibold text-content block">
+                          {themeConfig.brand.currencySymbol}
+                          {(effectivePrice * item.quantity).toLocaleString('es-AR')}
                         </span>
-                      )}
-                      <span className="font-medium text-content">
-                        {item.product?.name || item.name || 'Producto'}
-                      </span>
-                      {item.variantDescription && (
-                        <span className="text-mauve ml-1.5">({item.variantDescription})</span>
-                      )}
-                      <span className="text-content-muted ml-2">x {item.quantity} un.</span>
+                        {hasDiscount && (
+                          <div className="flex items-center justify-end gap-1 text-[10px]">
+                            <span className="text-content-muted line-through">
+                              {themeConfig.brand.currencySymbol}
+                              {(origPrice * item.quantity).toLocaleString('es-AR')}
+                            </span>
+                            <span className="text-emerald-400 font-medium">
+                              (-{themeConfig.brand.currencySymbol}
+                              {(
+                                (discountPerUnit || origPrice - effectivePrice) *
+                                item.quantity
+                              ).toLocaleString('es-AR')}
+                              )
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <span className="font-semibold text-content">
-                      {themeConfig.brand.currencySymbol}
-                      {(
-                        Number(item.price || item.product?.price || 0) * item.quantity
-                      ).toLocaleString('es-AR')}
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
+            </div>
+
+            {/* Desglose comercial completo del pedido */}
+            <div className="bg-canvas p-3.5 rounded-md border border-brand-border/20 text-xs space-y-1.5">
+              <div className="flex justify-between text-content-secondary">
+                <span>Subtotal lista</span>
+                <span className="font-semibold text-content">
+                  {themeConfig.brand.currencySymbol}
+                  {Number(selectedOrder.subtotal || selectedOrder.total || 0).toLocaleString(
+                    'es-AR'
+                  )}
+                </span>
+              </div>
+
+              {selectedOrder.couponCode && (
+                <div className="flex justify-between text-emerald-400">
+                  <span>Cupón aplicado ({selectedOrder.couponCode})</span>
+                  <span className="font-medium">
+                    -{themeConfig.brand.currencySymbol}
+                    {Number(selectedOrder.couponDiscount || 0).toLocaleString('es-AR')}
+                  </span>
+                </div>
+              )}
+
+              {selectedOrder.paymentMethodDiscount > 0 && (
+                <div className="flex justify-between text-emerald-400">
+                  <span>Bonificación Transferencia (10% OFF)</span>
+                  <span className="font-medium">
+                    -{themeConfig.brand.currencySymbol}
+                    {Number(selectedOrder.paymentMethodDiscount).toLocaleString('es-AR')}
+                  </span>
+                </div>
+              )}
+
+              <div className="flex justify-between text-content-secondary">
+                <span>Modalidad de entrega</span>
+                <span className="text-content font-medium">
+                  {selectedOrder.deliveryMethod === 'PICKUP'
+                    ? 'Retiro acordado (Sin costo)'
+                    : Number(selectedOrder.shippingTotal || 0) === 0
+                    ? 'Envío a domicilio (Gratis)'
+                    : `Envío a domicilio (${themeConfig.brand.currencySymbol}${Number(
+                        selectedOrder.shippingTotal
+                      ).toLocaleString('es-AR')})`}
+                </span>
+              </div>
+
+              {selectedOrder.totalSavings > 0 && (
+                <div className="pt-1.5 border-t border-brand-border/15 flex justify-between text-emerald-400 font-medium">
+                  <span>Ahorro total otorgado al cliente</span>
+                  <span>
+                    {themeConfig.brand.currencySymbol}
+                    {Number(selectedOrder.totalSavings).toLocaleString('es-AR')}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Internal Admin Notes */}

@@ -1,6 +1,21 @@
 import demoSeedData from './demo-data.json';
+import {
+  quoteCart,
+  enrichProductWithPricing,
+  normalizeCustomerKey,
+  getEffectiveCampaignStatus,
+  getCampaignTheme,
+  getSuggestedHomeSectionsTemplate,
+  resolveActiveHomeSections,
+  computeMarketingMetrics,
+  DEFAULT_PRICE_HISTORY_DAYS,
+  DEFAULT_SHIPPING_COST,
+  DEFAULT_FREE_SHIPPING_THRESHOLD,
+  DEFAULT_TRANSFER_DISCOUNT_PERCENT,
+} from '../../pricing-engine/index.js';
 
 export const DEMO_STATE_KEY = 'nocturna-demo-state';
+export const CURRENT_DEMO_VERSION = 6;
 export const DEMO_ADMIN_EMAIL = 'admin@nocturna.demo';
 export const DEMO_ADMIN_PASSWORD = 'demo1234';
 
@@ -42,8 +57,14 @@ const buildSampleOrders = (products = []) => {
       deliveryMethod: 'SHIPPING',
       comments: 'Entregar en recepción en sobre cerrado sin logos.',
       status: 'PENDING',
-      total: Number(p1.price || 32000),
-      createdAt: new Date(Date.now() - 3600000 * 2).toISOString(), // Hoy (hace 2 horas)
+      total: Math.round(Number(p1.price || 32000) * 0.8),
+      couponCode: 'BLACKFRIDAY',
+      couponDiscount: Math.round(Number(p1.price || 32000) * 0.1),
+      paymentMethodDiscount: Math.round(Number(p1.price || 32000) * 0.1),
+      utm_source: 'instagram',
+      utm_medium: 'social',
+      utm_campaign: 'black-friday',
+      createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
       items: [
         {
           id: 'demo_ord_item_1',
@@ -70,7 +91,10 @@ const buildSampleOrders = (products = []) => {
       status: 'CONFIRMED',
       adminNotes: 'Abonó por transferencia MercadoPago',
       total: Number(p2.price || 28000) * 2,
-      createdAt: new Date(Date.now() - 86400000 * 3).toISOString(), // Esta semana (hace 3 días)
+      utm_source: 'whatsapp',
+      utm_medium: 'chat',
+      utm_campaign: 'black-friday',
+      createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
       items: [
         {
           id: 'demo_ord_item_2',
@@ -96,7 +120,10 @@ const buildSampleOrders = (products = []) => {
       comments: 'Pasa a retirar por la tarde.',
       status: 'DELIVERED',
       total: Number(p3.price || 39500) + Number(p1.price || 32000),
-      createdAt: new Date(Date.now() - 86400000 * 16).toISOString(), // Este mes (hace 16 días)
+      utm_source: 'facebook',
+      utm_medium: 'cpc',
+      utm_campaign: 'dia-de-la-madre',
+      createdAt: new Date(Date.now() - 86400000 * 16).toISOString(),
       items: [
         {
           id: 'demo_ord_item_3a',
@@ -150,6 +177,13 @@ const buildSampleOrders = (products = []) => {
 const createInitialState = () => {
   const categories = clone(demoSeedData.categories || []);
   const products = clone(demoSeedData.products || []);
+  const campaigns = clone(demoSeedData.campaigns || []);
+  const promotions = clone(demoSeedData.promotions || []);
+  const coupons = clone(demoSeedData.coupons || []);
+  const tags = clone(demoSeedData.tags || []);
+  const collections = clone(demoSeedData.collections || []);
+  const priceHistory = clone(demoSeedData.priceHistory || []);
+  const subscribers = clone(demoSeedData.subscribers || []);
 
   const users = [
     {
@@ -165,10 +199,30 @@ const createInitialState = () => {
   const orders = buildSampleOrders(products);
 
   return {
-    version: 2,
+    version: CURRENT_DEMO_VERSION,
     initializedAt: new Date().toISOString(),
+    settings: clone(demoSeedData.settings || {
+      shippingCost: 4500,
+      freeShippingThreshold: 45000,
+      freePickupEnabled: true,
+      transferDiscountPercent: 10,
+      transferDiscountEnabled: true,
+      priceHistoryDays: 30,
+      generalTermsText: 'Envíos 100% discretos en empaque neutro sin identificación del contenido.',
+      shippingNoticeText: 'Envío gratis a todo el país superando el monto mínimo de compra.',
+      bankTransferInstructions: 'Transferencia bancaria. Te enviaremos los datos de CBU y Alias al confirmar el pedido por WhatsApp.',
+    }),
     categories,
     products,
+    campaigns,
+    promotions,
+    coupons,
+    tags,
+    collections,
+    homeSections: clone(demoSeedData.homeSections || []),
+    couponRedemptions: [],
+    subscribers,
+    priceHistory,
     users,
     orders,
     cart: [],
@@ -179,29 +233,112 @@ const createInitialState = () => {
 export const loadDemoState = () => {
   try {
     const raw = localStorage.getItem(DEMO_STATE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (parsed && Array.isArray(parsed.products) && Array.isArray(parsed.categories)) {
-        if (!Array.isArray(parsed.cart)) parsed.cart = [];
-        // Upgrade older demo state that only had 1 sample order so period filters have rich data
-        if (
-          Array.isArray(parsed.orders) &&
-          parsed.orders.length === 1 &&
-          parsed.orders[0]?.id === 'demo_ord_0001'
-        ) {
-          parsed.orders = buildSampleOrders(parsed.products);
-          saveDemoState(parsed);
-        }
-        return parsed;
-      }
+    if (!raw) {
+      const initial = createInitialState();
+      saveDemoState(initial);
+      return initial;
     }
-  } catch (err) {
-    console.warn('[DemoMode] Error leyendo localStorage, usando estado inicial:', err);
-  }
 
-  const initial = createInitialState();
-  saveDemoState(initial);
-  return initial;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') {
+      const initial = createInitialState();
+      saveDemoState(initial);
+      return initial;
+    }
+
+    let needsSave = false;
+
+    // Migración automática si la versión es anterior
+    if (!parsed.version || parsed.version < CURRENT_DEMO_VERSION) {
+      parsed.version = CURRENT_DEMO_VERSION;
+      // Actualizar campañas, promociones y secciones a la nueva versión con Black Friday activo y combo a $22.000
+      parsed.campaigns = clone(demoSeedData.campaigns || []);
+      parsed.promotions = clone(demoSeedData.promotions || []);
+      parsed.homeSections = clone(demoSeedData.homeSections || []);
+      parsed.priceHistory = clone(demoSeedData.priceHistory || []);
+      parsed.settings = clone(demoSeedData.settings || null);
+      needsSave = true;
+    }
+
+    if (!parsed.settings || typeof parsed.settings !== 'object') {
+      parsed.settings = clone(demoSeedData.settings || null);
+      needsSave = true;
+    }
+
+    if (!Array.isArray(parsed.products) || !Array.isArray(parsed.categories)) {
+      const initial = createInitialState();
+      saveDemoState(initial);
+      return initial;
+    }
+
+    if (!Array.isArray(parsed.cart)) {
+      parsed.cart = [];
+      needsSave = true;
+    }
+    if (!Array.isArray(parsed.subscribers)) {
+      parsed.subscribers = clone(demoSeedData.subscribers || []);
+      needsSave = true;
+    }
+    if (!Array.isArray(parsed.campaigns) || parsed.campaigns.length === 0) {
+      parsed.campaigns = clone(demoSeedData.campaigns || []);
+      needsSave = true;
+    }
+    if (!Array.isArray(parsed.promotions)) {
+      parsed.promotions = clone(demoSeedData.promotions || []);
+      needsSave = true;
+    }
+    if (!Array.isArray(parsed.coupons)) {
+      parsed.coupons = clone(demoSeedData.coupons || []);
+      needsSave = true;
+    }
+    if (!Array.isArray(parsed.tags)) {
+      parsed.tags = clone(demoSeedData.tags || []);
+      needsSave = true;
+    }
+    if (!Array.isArray(parsed.collections)) {
+      parsed.collections = clone(demoSeedData.collections || []);
+      needsSave = true;
+    }
+    if (!Array.isArray(parsed.homeSections) || parsed.homeSections.length === 0) {
+      parsed.homeSections = clone(demoSeedData.homeSections || []);
+      needsSave = true;
+    }
+    if (!Array.isArray(parsed.couponRedemptions)) {
+      parsed.couponRedemptions = [];
+      needsSave = true;
+    }
+    if (!Array.isArray(parsed.priceHistory) || parsed.priceHistory.length === 0) {
+      parsed.priceHistory = clone(demoSeedData.priceHistory || []);
+      needsSave = true;
+    }
+    if (!Array.isArray(parsed.orders)) {
+      parsed.orders = buildSampleOrders(parsed.products);
+      needsSave = true;
+    }
+    if (!Array.isArray(parsed.users) || parsed.users.length === 0) {
+      parsed.users = [
+        {
+          id: 'demo_user_admin',
+          name: 'Admin Nocturna (Demo)',
+          email: DEMO_ADMIN_EMAIL,
+          phone: '+54 9 3517 57-2841',
+          role: 'ADMIN',
+          createdAt: new Date(Date.now() - 86400000 * 7).toISOString(),
+        },
+      ];
+      needsSave = true;
+    }
+
+    if (needsSave) {
+      saveDemoState(parsed);
+    }
+    return parsed;
+  } catch (err) {
+    console.warn('[DemoMode] Error parseando estado local, reiniciando a inicial:', err);
+    const initial = createInitialState();
+    saveDemoState(initial);
+    return initial;
+  }
 };
 
 export const saveDemoState = (state) => {
@@ -218,6 +355,7 @@ export const resetDemoState = () => {
     localStorage.removeItem('nocturna_cart');
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+    sessionStorage.removeItem('nocturna_utm_attribution');
   } catch (err) {
     console.warn('[DemoMode] Error al restablecer estado demo:', err);
   }
@@ -253,13 +391,59 @@ const buildDemoWhatsAppLink = (order) => {
     const prodName = item.product?.name || item.name || 'Producto';
     const variantPart = item.variantDescription ? ` (${item.variantDescription})` : '';
     const skuPart = item.variant?.sku || item.product?.sku ? ` [SKU: ${item.variant?.sku || item.product?.sku}]` : '';
-    const subtotal = (Number(item.price || 0) * Number(item.quantity || 1)).toLocaleString('es-AR');
+    const unitPrice = Number(item.unitPrice || item.price || 0);
+    const subtotal = (unitPrice * Number(item.quantity || 1)).toLocaleString('es-AR');
     lines.push(`• ${item.quantity}x ${prodName}${variantPart}${skuPart} — $${subtotal}`);
+  }
+
+  lines.push('');
+  const subtotalVal = Number(order.subtotal || order.total || 0);
+  lines.push(`*Subtotal de productos:* $${subtotalVal.toLocaleString('es-AR')}`);
+
+  // Descuentos en productos
+  const itemDiscounts = (order.items || []).reduce(
+    (sum, it) => sum + Number(it.discountAmount || 0) * Number(it.quantity || 1),
+    0
+  );
+  if (itemDiscounts > 0) {
+    lines.push(`• Descuentos en productos: -$${itemDiscounts.toLocaleString('es-AR')}`);
+  }
+
+  // Descuentos a nivel carrito (ej. 2x1, combos)
+  if (order.cartDiscountsTotal > 0) {
+    lines.push(`• Promociones aplicadas: -$${Number(order.cartDiscountsTotal).toLocaleString('es-AR')}`);
+  }
+
+  // Cupón
+  if (order.couponCode && order.couponDiscount > 0) {
+    lines.push(`• Cupón ${order.couponCode}: -$${Number(order.couponDiscount).toLocaleString('es-AR')}`);
+  }
+
+  // Descuento Transferencia
+  if (order.paymentMethodDiscount > 0) {
+    lines.push(`• Bonificación Transferencia (10% OFF): -$${Number(order.paymentMethodDiscount).toLocaleString('es-AR')}`);
+  }
+
+  // Envío
+  if (order.deliveryMethod === 'PICKUP') {
+    lines.push(`• Retiro: Sin costo`);
+  } else if (order.shippingTotal === 0 || order.shippingDiscount > 0) {
+    lines.push(`• Envío a domicilio: ¡Gratis!`);
+  } else {
+    lines.push(`• Envío a domicilio: $${Number(order.shippingTotal || DEFAULT_SHIPPING_COST).toLocaleString('es-AR')}`);
   }
 
   lines.push(
     '',
-    `*Total estimado:* $${Number(order.total || 0).toLocaleString('es-AR')}`,
+    `*Total final a abonar:* $${Number(order.total || 0).toLocaleString('es-AR')}`
+  );
+
+  const totalAhorro = Number(order.totalSavings || 0) || (itemDiscounts + Number(order.cartDiscountsTotal || 0) + Number(order.couponDiscount || 0) + Number(order.paymentMethodDiscount || 0) + Number(order.shippingDiscount || 0));
+  if (totalAhorro > 0) {
+    lines.push(`*¡Ahorro total:* $${totalAhorro.toLocaleString('es-AR')}!*`);
+  }
+
+  lines.push(
     '',
     '_Solicito empaque 100% discreto sin logos. Quedo a la espera para coordinar pago y entrega._'
   );
@@ -727,19 +911,52 @@ export const demoAxiosAdapter = async (config) => {
       }
     }
 
-    if (sort === 'price_asc') {
-      list.sort((a, b) => Number(a.price) - Number(b.price));
+    // Enriquecer productos con cotización de precios, historial de precios, promociones activas y combos
+    const now = new Date();
+    let enrichedList = list.map((p) =>
+      enrichProductWithPricing(p, {
+        promotions: state.promotions || [],
+        campaigns: state.campaigns || [],
+        priceHistory: state.priceHistory || [],
+        now,
+        allProducts: state.products || [],
+      })
+    );
+
+    // Filtro "Solo ofertas"
+    const onlyOffers =
+      searchParams.get('onlyOffers') === 'true' || searchParams.get('onSale') === 'true';
+    if (onlyOffers) {
+      enrichedList = enrichedList.filter(
+        (p) =>
+          (p.pricing && p.pricing.savingsAmount > 0) ||
+          (Array.isArray(p.activePromotions) && p.activePromotions.length > 0)
+      );
+    }
+
+    if (sort === 'discount_desc') {
+      enrichedList.sort(
+        (a, b) =>
+          (Number(b.pricing?.discountPercent || 0) - Number(a.pricing?.discountPercent || 0)) ||
+          (Number(b.pricing?.savingsAmount || 0) - Number(a.pricing?.savingsAmount || 0))
+      );
+    } else if (sort === 'price_asc') {
+      enrichedList.sort(
+        (a, b) => Number(a.pricing?.finalPrice || a.price) - Number(b.pricing?.finalPrice || b.price)
+      );
     } else if (sort === 'price_desc') {
-      list.sort((a, b) => Number(b.price) - Number(a.price));
+      enrichedList.sort(
+        (a, b) => Number(b.pricing?.finalPrice || b.price) - Number(a.pricing?.finalPrice || a.price)
+      );
     } else if (sort === 'best_selling') {
-      list.sort((a, b) => Number(b.soldCount || 0) - Number(a.soldCount || 0));
+      enrichedList.sort((a, b) => Number(b.soldCount || 0) - Number(a.soldCount || 0));
     } else if (sort === 'newest' || includeInactive) {
-      list.sort(
+      enrichedList.sort(
         (a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
       );
     } else {
       // Orden por defecto: Destacados primero
-      list.sort((a, b) => {
+      enrichedList.sort((a, b) => {
         const aFeat = a.featured || a.badge === 'Destacado' ? 1 : 0;
         const bFeat = b.featured || b.badge === 'Destacado' ? 1 : 0;
         if (bFeat !== aFeat) return bFeat - aFeat;
@@ -747,10 +964,10 @@ export const demoAxiosAdapter = async (config) => {
       });
     }
 
-    const total = list.length;
+    const total = enrichedList.length;
     const skip = (page - 1) * limit;
     return makeResponse(config, 200, {
-      products: list.slice(skip, skip + limit),
+      products: enrichedList.slice(skip, skip + limit),
       total,
       page,
       limit,
@@ -761,7 +978,14 @@ export const demoAxiosAdapter = async (config) => {
     const id = decodeURIComponent(pathname.split('/')[2]);
     const found = state.products.find((p) => p.id === id);
     if (!found) throw makeError(config, 404, { error: 'Producto no encontrado' });
-    return makeResponse(config, 200, found);
+    const enriched = enrichProductWithPricing(found, {
+      promotions: state.promotions || [],
+      campaigns: state.campaigns || [],
+      priceHistory: state.priceHistory || [],
+      now: new Date(),
+      allProducts: state.products || [],
+    });
+    return makeResponse(config, 200, enriched);
   }
 
   if (pathname === '/products' && method === 'post') {
@@ -828,6 +1052,31 @@ export const demoAxiosAdapter = async (config) => {
     };
 
     state.products.unshift(newProduct);
+
+    if (!Array.isArray(state.priceHistory)) state.priceHistory = [];
+    state.priceHistory.push({
+      id: `demo_ph_${productId}_base`,
+      productId,
+      variantId: null,
+      oldPrice: basePrice,
+      newPrice: basePrice,
+      changedAt: new Date().toISOString(),
+      changedBy: 'DEMO_ADMIN',
+      reason: 'DEMO_PRODUCT_CREATION',
+    });
+    for (const v of variants) {
+      state.priceHistory.push({
+        id: `demo_ph_${v.id}`,
+        productId,
+        variantId: v.id,
+        oldPrice: v.price,
+        newPrice: v.price,
+        changedAt: new Date().toISOString(),
+        changedBy: 'DEMO_ADMIN',
+        reason: 'DEMO_VARIANT_CREATION',
+      });
+    }
+
     saveDemoState(state);
     return makeResponse(config, 201, newProduct);
   }
@@ -908,6 +1157,21 @@ export const demoAxiosAdapter = async (config) => {
     };
 
     state.products[idx] = updated;
+
+    if (!Array.isArray(state.priceHistory)) state.priceHistory = [];
+    if (basePrice !== current.price) {
+      state.priceHistory.push({
+        id: `demo_ph_${id}_${Date.now()}`,
+        productId: id,
+        variantId: null,
+        oldPrice: current.price,
+        newPrice: basePrice,
+        changedAt: new Date().toISOString(),
+        changedBy: 'DEMO_ADMIN',
+        reason: 'DEMO_PRICE_UPDATE',
+      });
+    }
+
     saveDemoState(state);
     return makeResponse(config, 200, updated);
   }
@@ -920,6 +1184,56 @@ export const demoAxiosAdapter = async (config) => {
   }
 
   // =========================================================================
+  // 3.5. CART QUOTE (/cart/quote)
+  // =========================================================================
+  if (pathname === '/cart/quote' && method === 'post') {
+    const rawItems = Array.isArray(body.items) ? body.items : [];
+    if (rawItems.length === 0) {
+      throw makeError(config, 400, { error: 'El carrito no contiene productos.' });
+    }
+
+    const preparedItems = rawItems.map((raw) => {
+      const prod = state.products.find((p) => p.id === raw.productId);
+      if (!prod) throw makeError(config, 404, { error: `Producto ${raw.productId} no encontrado` });
+      let variant = null;
+      if (raw.variantId && Array.isArray(prod.variants)) {
+        variant = prod.variants.find((v) => v.id === raw.variantId) || null;
+      }
+      return {
+        productId: prod.id,
+        variantId: variant?.id || null,
+        variantDescription: raw.variantDescription || null,
+        quantity: Math.max(1, Number(raw.quantity || 1)),
+        product: prod,
+        variant,
+      };
+    });
+
+    const quote = quoteCart(
+      { items: preparedItems },
+      {
+        couponCode: body.couponCode,
+        paymentMethod: body.paymentMethod,
+        customerEmail: body.customerEmail,
+        customerPhone: body.customerPhone,
+        shippingContext: body.shippingContext || {},
+        promotions: state.promotions || [],
+        campaigns: state.campaigns || [],
+        coupons: state.coupons || [],
+        couponRedemptions: state.couponRedemptions || [],
+        priceHistory: state.priceHistory || [],
+        now: new Date(),
+        historyDays: state.settings?.priceHistoryDays ?? 30,
+        freeShippingThreshold: state.settings?.freeShippingThreshold ?? 45000,
+        baseShippingCost: state.settings?.shippingCost ?? 4500,
+        transferDiscountPercent: state.settings?.transferDiscountEnabled !== false ? (state.settings?.transferDiscountPercent ?? 10) : 0,
+      }
+    );
+
+    return makeResponse(config, 200, quote);
+  }
+
+  // =========================================================================
   // 4. ORDERS (/orders/*)
   // =========================================================================
   if (pathname === '/orders' && method === 'post') {
@@ -928,9 +1242,7 @@ export const demoAxiosAdapter = async (config) => {
       throw makeError(config, 400, { error: 'El pedido no contiene productos.' });
     }
 
-    let orderTotal = 0;
-    const populatedItems = [];
-
+    const preparedItems = [];
     for (const item of rawItems) {
       const product = state.products.find((p) => p.id === item.productId);
       if (!product) {
@@ -950,42 +1262,89 @@ export const demoAxiosAdapter = async (config) => {
         });
       }
 
-      const unitPrice = variant ? Number(variant.price) : Number(product.price);
-      orderTotal += unitPrice * qty;
-
-      // Descontar stock en el estado local
-      if (variant) {
-        variant.stock = Math.max(0, Number(variant.stock || 0) - qty);
-        product.stock = (product.variants || []).reduce(
-          (s, v) => s + Number(v.stock || 0),
-          0
-        );
-      } else {
-        product.stock = Math.max(0, Number(product.stock || 0) - qty);
-      }
-      product.soldCount = Number(product.soldCount || 0) + qty;
-
-      populatedItems.push({
-        id: `demo_ord_item_${Date.now()}_${populatedItems.length}`,
+      preparedItems.push({
         productId: product.id,
         variantId: variant?.id || null,
         variantDescription: item.variantDescription || null,
         quantity: qty,
-        price: unitPrice,
-        product: {
-          id: product.id,
-          name: product.name,
-          sku: product.sku,
-          price: product.price,
-        },
-        variant: variant
-          ? {
-              id: variant.id,
-              sku: variant.sku,
-            }
-          : null,
+        product,
+        variant,
       });
     }
+
+    // AUTORIDAD EN MODO DEMO: Recalcula con quoteCart idéntico al backend real
+    const quote = quoteCart(
+      { items: preparedItems },
+      {
+        couponCode: body.couponCode,
+        paymentMethod: body.paymentMethod,
+        customerEmail: body.customerEmail,
+        customerPhone: body.customerPhone,
+        shippingContext: {
+          deliveryMethod: body.deliveryMethod,
+          postalCode: body.customerPostalCode,
+          province: body.customerProvince,
+        },
+        promotions: state.promotions || [],
+        campaigns: state.campaigns || [],
+        coupons: state.coupons || [],
+        couponRedemptions: state.couponRedemptions || [],
+        priceHistory: state.priceHistory || [],
+        now: new Date(),
+        historyDays: state.settings?.priceHistoryDays ?? 30,
+        freeShippingThreshold: state.settings?.freeShippingThreshold ?? 45000,
+        baseShippingCost: state.settings?.shippingCost ?? 4500,
+        transferDiscountPercent: state.settings?.transferDiscountEnabled !== false ? (state.settings?.transferDiscountPercent ?? 10) : 0,
+      }
+    );
+
+    if (body.couponCode && quote.couponError) {
+      throw makeError(config, 400, { error: `Cupón inválido: ${quote.couponError}` });
+    }
+
+    // Descontar stock local
+    for (const quotedItem of quote.items) {
+      const product = state.products.find((p) => p.id === quotedItem.productId);
+      if (product) {
+        if (quotedItem.variantId && Array.isArray(product.variants)) {
+          const v = product.variants.find((varItem) => varItem.id === quotedItem.variantId);
+          if (v) {
+            v.stock = Math.max(0, Number(v.stock || 0) - quotedItem.quantity);
+            product.stock = product.variants.reduce((s, it) => s + Number(it.stock || 0), 0);
+          }
+        } else {
+          product.stock = Math.max(0, Number(product.stock || 0) - quotedItem.quantity);
+        }
+        product.soldCount = Number(product.soldCount || 0) + quotedItem.quantity;
+      }
+    }
+
+    const populatedItems = quote.items.map((it, idx) => ({
+      id: `demo_ord_item_${Date.now()}_${idx}`,
+      productId: it.productId,
+      variantId: it.variantId,
+      variantDescription: it.variantDescription || null,
+      quantity: it.quantity,
+      originalUnitPrice: it.originalUnitPrice,
+      discountAmount: it.discountAmount,
+      unitPrice: it.unitPrice,
+      price: it.unitPrice, // retrocompatibilidad
+      subtotal: it.subtotal,
+      promotionId: it.promotionId || null,
+      campaignId: it.campaignId || null,
+      product: {
+        id: it.productId,
+        name: it.productName,
+        sku: it.sku,
+        price: it.unitPrice,
+      },
+      variant: it.variantId
+        ? {
+            id: it.variantId,
+            sku: it.sku,
+          }
+        : null,
+    }));
 
     const newOrder = {
       id: `demo_ord_${String(state.orders.length + 1).padStart(4, '0')}_${Date.now()
@@ -1001,10 +1360,36 @@ export const demoAxiosAdapter = async (config) => {
       deliveryMethod: body.deliveryMethod || 'DELIVERY',
       comments: body.comments ? String(body.comments).trim() : null,
       status: 'PENDING',
-      total: orderTotal,
+      subtotal: quote.subtotal,
+      couponCode: quote.coupon ? quote.coupon.code : null,
+      couponDiscount: quote.couponDiscount,
+      paymentMethodDiscount: quote.paymentMethodDiscount,
+      shippingDiscount: quote.shipping.discount,
+      shippingTotal: quote.shipping.finalCost,
+      total: quote.total,
+      utm_source: body.utm_source || null,
+      utm_medium: body.utm_medium || null,
+      utm_campaign: body.utm_campaign || null,
       createdAt: new Date().toISOString(),
       items: populatedItems,
     };
+
+    // Registrar redención de cupón si aplica
+    if (quote.coupon) {
+      const c = (state.coupons || []).find((cp) => cp.id === quote.coupon.id);
+      if (c) c.usedCount = (c.usedCount || 0) + 1;
+      const custKey = normalizeCustomerKey({ email: body.customerEmail, phone: body.customerPhone });
+      if (custKey) {
+        if (!Array.isArray(state.couponRedemptions)) state.couponRedemptions = [];
+        state.couponRedemptions.push({
+          id: `demo_red_${Date.now()}`,
+          couponId: quote.coupon.id,
+          orderId: newOrder.id,
+          customerKey: custKey,
+          createdAt: new Date().toISOString(),
+        });
+      }
+    }
 
     const whatsappLink = buildDemoWhatsAppLink(newOrder);
     newOrder.whatsappLink = whatsappLink;
@@ -1117,6 +1502,1022 @@ export const demoAxiosAdapter = async (config) => {
     }
     const dataUrl = await resizeImageToDataUrl(file, 800, 0.78);
     return makeResponse(config, 200, { url: dataUrl });
+  }
+
+  // =========================================================================
+  // 7. CAMPAIGNS (/campaigns/*)
+  // =========================================================================
+  
+  if ((pathname.match(/^\/campaigns\/[^/]+\/view$/) || pathname.match(/^\/campaigns\/view\/[^/]+$/)) && method === 'post') {
+    if (!Array.isArray(state.campaigns)) state.campaigns = [];
+    const parts = pathname.split('/');
+    const idOrSlug = parts[2] === 'view' ? decodeURIComponent(parts[3]) : decodeURIComponent(parts[2]);
+    const camp = state.campaigns.find((c) => c.id === idOrSlug || c.slug === idOrSlug);
+    if (camp) {
+      camp.views = (Number(camp.views) || 0) + 1;
+      saveDemoState(state);
+      return makeResponse(config, 200, { success: true, views: camp.views });
+    }
+    return makeResponse(config, 200, { success: false, views: 0 });
+  }
+
+  if (pathname === '/campaigns/active' && method === 'get') {
+    if (!Array.isArray(state.campaigns)) state.campaigns = [];
+    const params = new URL(config.url, 'http://localhost').searchParams;
+    const previewId = params.get('preview');
+    const now = new Date();
+
+    if (previewId) {
+      const previewCamp = state.campaigns.find(c => c.id === previewId || c.slug === previewId);
+      if (previewCamp) {
+        return makeResponse(config, 200, {
+          ...previewCamp,
+          effectiveStatus: getEffectiveCampaignStatus(previewCamp, now),
+          isPreview: true,
+        });
+      }
+    }
+
+    const activeList = state.campaigns
+      .map(c => ({ ...c, effectiveStatus: getEffectiveCampaignStatus(c, now) }))
+      .filter(c => c.effectiveStatus === 'ACTIVE' && c.active !== false)
+      .sort((a, b) => (b.priority || 0) - (a.priority || 0));
+
+    return makeResponse(config, 200, activeList[0] || null);
+  }
+
+  if (pathname.match(/^\/campaigns\/public\/[^/]+$/) && method === 'get') {
+    if (!Array.isArray(state.campaigns)) state.campaigns = [];
+    const slug = decodeURIComponent(pathname.split('/')[3]);
+    const params = new URL(config.url, 'http://localhost').searchParams;
+    const previewId = params.get('preview');
+    const now = new Date();
+
+    const camp = state.campaigns.find(c => c.slug === slug || c.id === slug);
+    if (!camp) throw makeError(config, 404, { error: 'Campaña no encontrada' });
+
+    const isPreview = previewId && (previewId === camp.id || previewId === camp.slug || previewId === 'true');
+    const effectiveStatus = getEffectiveCampaignStatus(camp, now);
+
+    if (!isPreview && effectiveStatus !== 'ACTIVE') {
+      return makeResponse(config, 200, { ...camp, inactive: true, effectiveStatus });
+    }
+
+    const promotions = (state.promotions || []).filter(p => p.campaignId === camp.id && p.active !== false);
+
+    // Obtener y cotizar productos asociados a la campaña
+    const enrichedProducts = (state.products || [])
+      .filter(p => p.active !== false)
+      .map(p => enrichProductWithPricing(p, {
+        promotions: state.promotions || [],
+        campaigns: state.campaigns || [],
+        priceHistory: state.priceHistory || [],
+        now,
+      }))
+      .filter(p => {
+        // Filtrar productos que apliquen a las promociones de la campaña
+        return (p.activePromotions || []).some(ap => ap.campaignId === camp.id);
+      });
+
+    return makeResponse(config, 200, {
+      ...camp,
+      effectiveStatus,
+      promotions,
+      products: enrichedProducts,
+      themeConfig: getCampaignTheme(camp.theme),
+      isPreview: Boolean(isPreview),
+    });
+  }
+
+  if (pathname === '/campaigns' && method === 'get') {
+    if (!Array.isArray(state.campaigns)) state.campaigns = [];
+    const params = new URL(config.url, 'http://localhost').searchParams;
+    const statusFilter = params.get('status');
+    const searchFilter = (params.get('search') || '').toLowerCase().trim();
+
+    const now = new Date();
+    let list = state.campaigns.map((c) => {
+      const promotions = (state.promotions || []).filter((p) => p.campaignId === c.id);
+      return {
+        ...c,
+        promotions,
+        effectiveStatus: getEffectiveCampaignStatus(c, now),
+      };
+    });
+
+    if (statusFilter && statusFilter !== 'ALL') {
+      list = list.filter((c) => c.status === statusFilter || c.effectiveStatus === statusFilter);
+    }
+    if (searchFilter) {
+      list = list.filter((c) =>
+        c.name.toLowerCase().includes(searchFilter) ||
+        (c.headline && c.headline.toLowerCase().includes(searchFilter))
+      );
+    }
+
+    list.sort((a, b) => (b.priority || 0) - (a.priority || 0));
+    return makeResponse(config, 200, list);
+  }
+
+  if (pathname.match(/^\/campaigns\/[^/]+$/) && method === 'get') {
+    const id = decodeURIComponent(pathname.split('/')[2]);
+    const camp = (state.campaigns || []).find((c) => c.id === id);
+    if (!camp) throw makeError(config, 404, { error: 'Campaña no encontrada' });
+    const promotions = (state.promotions || []).filter((p) => p.campaignId === id);
+    return makeResponse(config, 200, {
+      ...camp,
+      promotions,
+      effectiveStatus: getEffectiveCampaignStatus(camp, new Date()),
+    });
+  }
+
+  if (pathname === '/campaigns' && method === 'post') {
+    if (!Array.isArray(state.campaigns)) state.campaigns = [];
+    if (!Array.isArray(state.promotions)) state.promotions = [];
+
+    const newId = `demo_camp_${Date.now()}`;
+    const slug = body.slug ? slugify(body.slug) : `${slugify(body.name)}-${Date.now().toString().slice(-4)}`;
+
+    const newCamp = {
+      id: newId,
+      name: String(body.name || 'Nueva Campaña').trim(),
+      slug,
+      status: body.status || 'DRAFT',
+      startsAt: body.startsAt || null,
+      endsAt: body.endsAt || null,
+      priority: Number(body.priority || 0),
+      active: body.active !== false,
+      headline: body.headline || null,
+      subheadline: body.subheadline || null,
+      description: body.description || null,
+      bannerUrl: body.bannerUrl || null,
+      bannerImage: body.bannerImage || body.bannerUrl || null,
+      theme: body.theme || 'neutro',
+      themeConfig: body.themeConfig || null,
+      announcementText: body.announcementText || null,
+      announcementLink: body.announcementLink || null,
+      conditionsText: body.conditionsText || null,
+      showCountdown: Boolean(body.showCountdown),
+      landingEnabled: body.landingEnabled !== false,
+      seoTitle: body.seoTitle || null,
+      seoDescription: body.seoDescription || null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      promotions: [],
+    };
+
+    if (Array.isArray(body.promotions) && body.promotions.length > 0) {
+      body.promotions.forEach((p, idx) => {
+        const promoId = `demo_promo_${newId}_${idx}`;
+        const createdPromo = {
+          id: promoId,
+          campaignId: newId,
+          name: String(p.name || 'Promoción').trim(),
+          kind: p.kind || 'PERCENT',
+          value: p.value != null ? Number(p.value) : null,
+          minQuantity: p.minQuantity != null ? Number(p.minQuantity) : null,
+          minOrderAmount: p.minOrderAmount != null ? Number(p.minOrderAmount) : null,
+          maxDiscountAmount: p.maxDiscountAmount != null ? Number(p.maxDiscountAmount) : null,
+          tiers: p.tiers ? (typeof p.tiers === 'string' ? p.tiers : JSON.stringify(p.tiers)) : null,
+          buyQuantity: p.buyQuantity != null ? Number(p.buyQuantity) : null,
+          payQuantity: p.payQuantity != null ? Number(p.payQuantity) : null,
+          bundleSkus: p.bundleSkus ? (typeof p.bundleSkus === 'string' ? p.bundleSkus : JSON.stringify(p.bundleSkus)) : null,
+          paymentMethod: p.paymentMethod || null,
+          stackable: Boolean(p.stackable),
+          startsAt: newCamp.startsAt,
+          endsAt: newCamp.endsAt,
+          active: true,
+          targets: Array.isArray(p.targets) ? p.targets : [],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        state.promotions.push(createdPromo);
+        newCamp.promotions.push(createdPromo);
+      });
+    }
+
+    state.campaigns.unshift(newCamp);
+    saveDemoState(state);
+    return makeResponse(config, 201, {
+      ...newCamp,
+      effectiveStatus: getEffectiveCampaignStatus(newCamp, new Date()),
+    });
+  }
+
+  if (pathname.match(/^\/campaigns\/[^/]+$/) && method === 'put') {
+    const id = decodeURIComponent(pathname.split('/')[2]);
+    const idx = (state.campaigns || []).findIndex((c) => c.id === id);
+    if (idx === -1) throw makeError(config, 404, { error: 'Campaña no encontrada' });
+
+    const current = state.campaigns[idx];
+    const updated = {
+      ...current,
+      ...body,
+      updatedAt: new Date().toISOString(),
+    };
+    state.campaigns[idx] = updated;
+    saveDemoState(state);
+    return makeResponse(config, 200, {
+      ...updated,
+      effectiveStatus: getEffectiveCampaignStatus(updated, new Date()),
+    });
+  }
+
+  if (pathname.match(/^\/campaigns\/[^/]+$/) && method === 'delete') {
+    const id = decodeURIComponent(pathname.split('/')[2]);
+    state.campaigns = (state.campaigns || []).filter((c) => c.id !== id);
+    state.promotions = (state.promotions || []).filter((p) => p.campaignId !== id);
+    saveDemoState(state);
+    return makeResponse(config, 200, { message: 'Campaña eliminada' });
+  }
+
+  if (pathname.match(/^\/campaigns\/[^/]+\/duplicate$/) && method === 'post') {
+    const id = decodeURIComponent(pathname.split('/')[2]);
+    const original = (state.campaigns || []).find((c) => c.id === id);
+    if (!original) throw makeError(config, 404, { error: 'Campaña no encontrada' });
+
+    const newId = `demo_camp_${Date.now()}`;
+    const duplicated = {
+      ...clone(original),
+      id: newId,
+      name: `${original.name} (Copia)`,
+      slug: `${original.slug}-copia-${Date.now().toString().slice(-4)}`,
+      status: 'DRAFT',
+      active: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      promotions: [],
+    };
+
+    const originalPromos = (state.promotions || []).filter((p) => p.campaignId === id);
+    originalPromos.forEach((p, idx) => {
+      const duplicatedPromo = {
+        ...clone(p),
+        id: `demo_promo_${newId}_${idx}`,
+        campaignId: newId,
+        name: `${p.name} (Copia)`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      state.promotions.push(duplicatedPromo);
+      duplicated.promotions.push(duplicatedPromo);
+    });
+
+    state.campaigns.unshift(duplicated);
+    saveDemoState(state);
+    return makeResponse(config, 201, duplicated);
+  }
+
+  if (pathname.match(/^\/campaigns\/[^/]+\/status$/) && method === 'patch') {
+    const id = decodeURIComponent(pathname.split('/')[2]);
+    const camp = (state.campaigns || []).find((c) => c.id === id);
+    if (!camp) throw makeError(config, 404, { error: 'Campaña no encontrada' });
+    camp.status = body.status || camp.status;
+    camp.updatedAt = new Date().toISOString();
+    saveDemoState(state);
+    return makeResponse(config, 200, camp);
+  }
+
+  if (pathname.match(/^\/campaigns\/[^/]+\/end$/) && method === 'patch') {
+    const id = decodeURIComponent(pathname.split('/')[2]);
+    const camp = (state.campaigns || []).find((c) => c.id === id);
+    if (!camp) throw makeError(config, 404, { error: 'Campaña no encontrada' });
+    camp.status = 'ENDED';
+    camp.endsAt = new Date().toISOString();
+    camp.updatedAt = new Date().toISOString();
+    saveDemoState(state);
+    return makeResponse(config, 200, camp);
+  }
+
+  if (pathname.match(/^\/campaigns\/[^/]+\/archive$/) && method === 'patch') {
+    const id = decodeURIComponent(pathname.split('/')[2]);
+    const camp = (state.campaigns || []).find((c) => c.id === id);
+    if (!camp) throw makeError(config, 404, { error: 'Campaña no encontrada' });
+    camp.status = 'ARCHIVED';
+    camp.active = false;
+    camp.updatedAt = new Date().toISOString();
+    saveDemoState(state);
+    return makeResponse(config, 200, camp);
+  }
+
+  // =========================================================================
+  // 8. PROMOTIONS (/promotions/*)
+  // =========================================================================
+  if (pathname === '/promotions' && method === 'get') {
+    if (!Array.isArray(state.promotions)) state.promotions = [];
+    const params = new URL(config.url, 'http://localhost').searchParams;
+    const campId = params.get('campaignId');
+    const kind = params.get('kind');
+    const activeFilter = params.get('active');
+
+    let list = state.promotions.map((p) => {
+      const camp = (state.campaigns || []).find((c) => c.id === p.campaignId) || null;
+      return { ...p, campaign: camp };
+    });
+
+    if (campId) list = list.filter((p) => p.campaignId === campId);
+    if (kind) list = list.filter((p) => p.kind === kind);
+    if (activeFilter !== null && activeFilter !== undefined && activeFilter !== '') {
+      const b = activeFilter === 'true';
+      list = list.filter((p) => Boolean(p.active) === b);
+    }
+    return makeResponse(config, 200, list);
+  }
+
+  if (pathname.match(/^\/promotions\/[^/]+$/) && method === 'get') {
+    const id = decodeURIComponent(pathname.split('/')[2]);
+    const promo = (state.promotions || []).find((p) => p.id === id);
+    if (!promo) throw makeError(config, 404, { error: 'Promoción no encontrada' });
+    const camp = (state.campaigns || []).find((c) => c.id === promo.campaignId) || null;
+    return makeResponse(config, 200, { ...promo, campaign: camp });
+  }
+
+  if (pathname === '/promotions' && method === 'post') {
+    if (!Array.isArray(state.promotions)) state.promotions = [];
+    const newPromo = {
+      id: `demo_promo_${Date.now()}`,
+      campaignId: body.campaignId || null,
+      name: String(body.name || 'Promoción').trim(),
+      kind: body.kind,
+      value: body.value != null ? Number(body.value) : null,
+      minQuantity: body.minQuantity != null ? Number(body.minQuantity) : null,
+      minOrderAmount: body.minOrderAmount != null ? Number(body.minOrderAmount) : null,
+      maxDiscountAmount: body.maxDiscountAmount != null ? Number(body.maxDiscountAmount) : null,
+      tiers: body.tiers ? (typeof body.tiers === 'string' ? body.tiers : JSON.stringify(body.tiers)) : null,
+      buyQuantity: body.buyQuantity != null ? Number(body.buyQuantity) : null,
+      payQuantity: body.payQuantity != null ? Number(body.payQuantity) : null,
+      bundleSkus: body.bundleSkus ? (typeof body.bundleSkus === 'string' ? body.bundleSkus : JSON.stringify(body.bundleSkus)) : null,
+      paymentMethod: body.paymentMethod || null,
+      stackable: Boolean(body.stackable),
+      startsAt: body.startsAt || null,
+      endsAt: body.endsAt || null,
+      active: body.active !== false,
+      usageLimit: body.usageLimit != null ? Number(body.usageLimit) : null,
+      priority: Number(body.priority || 0),
+      targets: Array.isArray(body.targets) ? body.targets : [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    state.promotions.unshift(newPromo);
+    saveDemoState(state);
+    return makeResponse(config, 201, newPromo);
+  }
+
+  if (pathname.match(/^\/promotions\/[^/]+$/) && method === 'put') {
+    const id = decodeURIComponent(pathname.split('/')[2]);
+    const idx = (state.promotions || []).findIndex((p) => p.id === id);
+    if (idx === -1) throw makeError(config, 404, { error: 'Promoción no encontrada' });
+    const current = state.promotions[idx];
+    const updated = {
+      ...current,
+      ...body,
+      targets: Array.isArray(body.targets) ? body.targets : current.targets,
+      updatedAt: new Date().toISOString(),
+    };
+    state.promotions[idx] = updated;
+    saveDemoState(state);
+    return makeResponse(config, 200, updated);
+  }
+
+  if (pathname.match(/^\/promotions\/[^/]+$/) && method === 'delete') {
+    const id = decodeURIComponent(pathname.split('/')[2]);
+    state.promotions = (state.promotions || []).filter((p) => p.id !== id);
+    saveDemoState(state);
+    return makeResponse(config, 200, { message: 'Promoción eliminada' });
+  }
+
+  if (pathname.match(/^\/promotions\/[^/]+\/toggle$/) && method === 'patch') {
+    const id = decodeURIComponent(pathname.split('/')[2]);
+    const promo = (state.promotions || []).find((p) => p.id === id);
+    if (!promo) throw makeError(config, 404, { error: 'Promoción no encontrada' });
+    promo.active = !promo.active;
+    promo.updatedAt = new Date().toISOString();
+    saveDemoState(state);
+    return makeResponse(config, 200, promo);
+  }
+
+  // =========================================================================
+  // 9. COUPONS (/coupons/*)
+  // =========================================================================
+  if (pathname === '/coupons/export/csv' && method === 'get') {
+    const coupons = state.coupons || [];
+    const headers = [
+      'Código',
+      'Tipo',
+      'Valor',
+      'Compra Mínima',
+      'Tope Descuento',
+      'Usos Actuales',
+      'Límite Total',
+      'Límite Por Cliente',
+      'Acumulable con Promos',
+      'Estado',
+    ];
+    const rows = coupons.map((c) => [
+      `"${c.code}"`,
+      `"${c.kind}"`,
+      c.value,
+      c.minOrderAmount || '',
+      c.maxDiscountAmount || '',
+      c.usedCount || 0,
+      c.usageLimitTotal || 'Ilimitado',
+      c.usageLimitPerCustomer || 'Ilimitado',
+      c.stackableWithPromotions ? 'Sí' : 'No',
+      c.active ? 'Activo' : 'Inactivo',
+    ]);
+    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    return makeResponse(config, 200, csvContent, {
+      'content-type': 'text/csv; charset=utf-8',
+    });
+  }
+
+  if (pathname === '/coupons' && method === 'get') {
+    if (!Array.isArray(state.coupons)) state.coupons = [];
+    const params = new URL(config.url, 'http://localhost').searchParams;
+    const search = (params.get('search') || '').toUpperCase().trim();
+    const activeFilter = params.get('active');
+
+    let list = state.coupons.map((c) => {
+      const redemptionsCount = (state.couponRedemptions || []).filter((r) => r.couponId === c.id).length;
+      return {
+        ...c,
+        _count: { redemptions: redemptionsCount },
+      };
+    });
+
+    if (search) list = list.filter((c) => c.code.toUpperCase().includes(search));
+    if (activeFilter !== null && activeFilter !== undefined && activeFilter !== '') {
+      const b = activeFilter === 'true';
+      list = list.filter((c) => Boolean(c.active) === b);
+    }
+    return makeResponse(config, 200, list);
+  }
+
+  if (pathname.match(/^\/coupons\/[^/]+$/) && method === 'get') {
+    const id = decodeURIComponent(pathname.split('/')[2]);
+    const coupon = (state.coupons || []).find((c) => c.id === id);
+    if (!coupon) throw makeError(config, 404, { error: 'Cupón no encontrado' });
+    const redemptions = (state.couponRedemptions || []).filter((r) => r.couponId === id);
+    return makeResponse(config, 200, { ...coupon, redemptions });
+  }
+
+  if (pathname === '/coupons' && method === 'post') {
+    if (!Array.isArray(state.coupons)) state.coupons = [];
+    const normalizedCode = String(body.code || '').trim().toUpperCase();
+    if (!normalizedCode) throw makeError(config, 400, { error: 'El código es requerido' });
+
+    const exists = state.coupons.some((c) => c.code.toUpperCase() === normalizedCode);
+    if (exists) throw makeError(config, 400, { error: 'Ya existe un cupón con ese código' });
+
+    const newCoupon = {
+      id: `demo_coupon_${Date.now()}`,
+      code: normalizedCode,
+      kind: body.kind,
+      value: Number(body.value || 0),
+      minOrderAmount: body.minOrderAmount != null ? Number(body.minOrderAmount) : null,
+      maxDiscountAmount: body.maxDiscountAmount != null ? Number(body.maxDiscountAmount) : null,
+      startsAt: body.startsAt || null,
+      endsAt: body.endsAt || null,
+      usageLimitTotal: body.usageLimitTotal != null ? Number(body.usageLimitTotal) : null,
+      usageLimitPerCustomer: body.usageLimitPerCustomer != null ? Number(body.usageLimitPerCustomer) : null,
+      usedCount: 0,
+      active: body.active !== false,
+      campaignId: body.campaignId || null,
+      appliesTo: body.appliesTo || 'ALL',
+      stackableWithPromotions: Boolean(body.stackableWithPromotions),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    state.coupons.unshift(newCoupon);
+    saveDemoState(state);
+    return makeResponse(config, 201, newCoupon);
+  }
+
+  if (pathname.match(/^\/coupons\/[^/]+$/) && method === 'put') {
+    const id = decodeURIComponent(pathname.split('/')[2]);
+    const idx = (state.coupons || []).findIndex((c) => c.id === id);
+    if (idx === -1) throw makeError(config, 404, { error: 'Cupón no encontrado' });
+    const current = state.coupons[idx];
+    const updated = {
+      ...current,
+      ...body,
+      code: body.code ? String(body.code).trim().toUpperCase() : current.code,
+      updatedAt: new Date().toISOString(),
+    };
+    state.coupons[idx] = updated;
+    saveDemoState(state);
+    return makeResponse(config, 200, updated);
+  }
+
+  if (pathname.match(/^\/coupons\/[^/]+$/) && method === 'delete') {
+    const id = decodeURIComponent(pathname.split('/')[2]);
+    state.coupons = (state.coupons || []).filter((c) => c.id !== id);
+    saveDemoState(state);
+    return makeResponse(config, 200, { message: 'Cupón eliminado' });
+  }
+
+  if (pathname.match(/^\/coupons\/[^/]+\/toggle$/) && method === 'patch') {
+    const id = decodeURIComponent(pathname.split('/')[2]);
+    const coupon = (state.coupons || []).find((c) => c.id === id);
+    if (!coupon) throw makeError(config, 404, { error: 'Cupón no encontrado' });
+    coupon.active = !coupon.active;
+    coupon.updatedAt = new Date().toISOString();
+    saveDemoState(state);
+    return makeResponse(config, 200, coupon);
+  }
+
+  // =========================================================================
+  // 10. COLLECTIONS (/collections/*)
+  // =========================================================================
+  if (pathname === '/collections' && method === 'get') {
+    if (!Array.isArray(state.collections)) state.collections = [];
+    const populated = state.collections.map((coll) => {
+      const items = (coll.products || []).map((cp) => {
+        const prod = state.products.find((p) => p.id === cp.productId);
+        return {
+          ...cp,
+          product: prod ? { id: prod.id, name: prod.name, sku: prod.sku, price: prod.price, imageUrl: prod.imageUrl } : null,
+        };
+      });
+      return { ...coll, products: items };
+    });
+    return makeResponse(config, 200, populated);
+  }
+
+  if (pathname.match(/^\/collections\/[^/]+$/) && method === 'get') {
+    const id = decodeURIComponent(pathname.split('/')[2]);
+    const coll = (state.collections || []).find((c) => c.id === id);
+    if (!coll) throw makeError(config, 404, { error: 'Colección no encontrada' });
+    const items = (coll.products || []).map((cp) => {
+      const prod = state.products.find((p) => p.id === cp.productId);
+      return { ...cp, product: prod };
+    });
+    return makeResponse(config, 200, { ...coll, products: items });
+  }
+
+  if (pathname === '/collections' && method === 'post') {
+    if (!Array.isArray(state.collections)) state.collections = [];
+    const newId = `demo_coll_${Date.now()}`;
+    const slug = body.slug ? slugify(body.slug) : slugify(body.name);
+    const pIds = Array.isArray(body.productIds) ? body.productIds : [];
+
+    const newColl = {
+      id: newId,
+      name: String(body.name || 'Colección').trim(),
+      slug,
+      description: body.description || null,
+      active: body.active !== false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      products: pIds.map((pId, idx) => ({
+        collectionId: newId,
+        productId: pId,
+        order: idx,
+      })),
+    };
+    state.collections.unshift(newColl);
+    saveDemoState(state);
+    return makeResponse(config, 201, newColl);
+  }
+
+  if (pathname.match(/^\/collections\/[^/]+$/) && method === 'put') {
+    const id = decodeURIComponent(pathname.split('/')[2]);
+    const idx = (state.collections || []).findIndex((c) => c.id === id);
+    if (idx === -1) throw makeError(config, 404, { error: 'Colección no encontrada' });
+    const current = state.collections[idx];
+    const pIds = Array.isArray(body.productIds) ? body.productIds : (current.products || []).map((p) => p.productId);
+
+    const updated = {
+      ...current,
+      name: body.name !== undefined ? String(body.name).trim() : current.name,
+      slug: body.slug ? slugify(body.slug) : current.slug,
+      description: body.description !== undefined ? body.description : current.description,
+      active: body.active !== undefined ? Boolean(body.active) : current.active,
+      updatedAt: new Date().toISOString(),
+      products: pIds.map((pId, order) => ({
+        collectionId: id,
+        productId: pId,
+        order,
+      })),
+    };
+    state.collections[idx] = updated;
+    saveDemoState(state);
+    return makeResponse(config, 200, updated);
+  }
+
+  if (pathname.match(/^\/collections\/[^/]+$/) && method === 'delete') {
+    const id = decodeURIComponent(pathname.split('/')[2]);
+    state.collections = (state.collections || []).filter((c) => c.id !== id);
+    saveDemoState(state);
+    return makeResponse(config, 200, { message: 'Colección eliminada' });
+  }
+
+  // =========================================================================
+  // 11. TAGS (/tags/*)
+  // =========================================================================
+  if (pathname === '/tags' && method === 'get') {
+    if (!Array.isArray(state.tags)) state.tags = [];
+    const populated = state.tags.map((t) => {
+      const count = (state.products || []).filter((p) =>
+        (p.tags || []).some((pt) => pt.id === t.id || pt === t.name)
+      ).length;
+      return {
+        ...t,
+        _count: { products: count },
+      };
+    });
+    return makeResponse(config, 200, populated);
+  }
+
+  if (pathname === '/tags' && method === 'post') {
+    if (!Array.isArray(state.tags)) state.tags = [];
+    const name = String(body.name || '').trim();
+    if (!name) throw makeError(config, 400, { error: 'Nombre requerido' });
+    const slug = body.slug ? slugify(body.slug) : slugify(name);
+    const existing = state.tags.find((t) => t.slug === slug || t.name.toLowerCase() === name.toLowerCase());
+    if (existing) return makeResponse(config, 200, existing);
+
+    const newTag = {
+      id: `demo_tag_${Date.now()}`,
+      name,
+      slug,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    state.tags.push(newTag);
+    saveDemoState(state);
+    return makeResponse(config, 201, newTag);
+  }
+
+  if (pathname.match(/^\/tags\/[^/]+$/) && method === 'delete') {
+    const id = decodeURIComponent(pathname.split('/')[2]);
+    state.tags = (state.tags || []).filter((t) => t.id !== id);
+    saveDemoState(state);
+    return makeResponse(config, 200, { message: 'Etiqueta eliminada' });
+  }
+
+  if (pathname === '/tags/assign' && method === 'post') {
+    const { productId, tagIds = [] } = body;
+    const prod = (state.products || []).find((p) => p.id === productId);
+    if (!prod) throw makeError(config, 404, { error: 'Producto no encontrado' });
+    const matched = (state.tags || []).filter((t) => tagIds.includes(t.id));
+    prod.tags = matched;
+    saveDemoState(state);
+    return makeResponse(config, 200, prod);
+  }
+
+  // =========================================================================
+  // 12. AUDIT (/audit/*)
+  // =========================================================================
+  
+  if (pathname === '/audit/marketing' && method === 'get') {
+    if (!Array.isArray(state.orders)) state.orders = [];
+    if (!Array.isArray(state.campaigns)) state.campaigns = [];
+    if (!Array.isArray(state.coupons)) state.coupons = [];
+
+    const params = new URL(config.url, 'http://localhost').searchParams;
+    const range = params.get('range') || '30d';
+    const startDate = params.get('startDate');
+    const endDate = params.get('endDate');
+
+    const now = new Date();
+    let start = null;
+    let end = endDate ? new Date(endDate) : null;
+
+    if (startDate) {
+      start = new Date(startDate);
+    } else if (range === 'today') {
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+    } else if (range === '7d') {
+      start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    } else if (range === '30d') {
+      start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    } else if (range === 'month') {
+      start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+    }
+
+    const filteredOrders = state.orders.filter((ord) => {
+      if (ord.status === 'CANCELLED') return false;
+      const d = new Date(ord.createdAt);
+      if (start && d < start) return false;
+      if (end && d > end) return false;
+      return true;
+    });
+
+    const metrics = computeMarketingMetrics({
+      orders: filteredOrders,
+      campaigns: state.campaigns,
+      coupons: state.coupons,
+      range,
+      start,
+      end,
+    });
+
+    return makeResponse(config, 200, metrics);
+  }
+
+  if (pathname === '/audit/price-history' && method === 'get') {
+    if (!Array.isArray(state.priceHistory)) state.priceHistory = [];
+    const params = new URL(config.url, 'http://localhost').searchParams;
+    const productId = params.get('productId');
+    const variantId = params.get('variantId');
+    const page = Number(params.get('page') || 1);
+    const limit = Number(params.get('limit') || 50);
+
+    let list = state.priceHistory.map((ph) => {
+      const prod = (state.products || []).find((p) => p.id === ph.productId);
+      let variant = null;
+      if (ph.variantId && prod && Array.isArray(prod.variants)) {
+        variant = prod.variants.find((v) => v.id === ph.variantId) || null;
+      }
+      return {
+        ...ph,
+        product: prod ? { id: prod.id, name: prod.name, sku: prod.sku } : null,
+        variant: variant ? { id: variant.id, sku: variant.sku, size: variant.size, color: variant.color } : null,
+      };
+    });
+
+    if (productId) list = list.filter((ph) => ph.productId === productId);
+    if (variantId) list = list.filter((ph) => ph.variantId === variantId);
+
+    list.sort((a, b) => new Date(b.changedAt).getTime() - new Date(a.changedAt).getTime());
+    const skip = (page - 1) * limit;
+
+    return makeResponse(config, 200, {
+      items: list.slice(skip, skip + limit),
+      total: list.length,
+      page,
+      limit,
+    });
+  }
+
+  // =========================================================================
+  // 13. HOME SECTIONS (/home-sections/*)
+  // =========================================================================
+  if (pathname === '/home-sections' && method === 'get') {
+    if (!Array.isArray(state.homeSections)) state.homeSections = [];
+    const params = new URL(config.url, 'http://localhost').searchParams;
+    const campaignId = params.get('campaignId');
+    const preview = params.get('preview');
+    const activeOnly = params.get('activeOnly') === 'true';
+
+    // 13.1 Solicitud explícita para una campaña (usada por /admin/portada)
+    if (campaignId !== null && campaignId !== undefined) {
+      const targetCampId = (campaignId === 'base' || campaignId === '' || campaignId === 'null') ? null : campaignId;
+      const filtered = state.homeSections
+        .filter((s) => (s.campaignId || null) === targetCampId && (!activeOnly || s.enabled !== false))
+        .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+      return makeResponse(config, 200, {
+        sections: filtered,
+        activeCampaign: null,
+      });
+    }
+
+    // 13.2 Solicitud pública (con o sin vista previa ?preview=<id>)
+    const now = new Date();
+    const previewCampaign = preview
+      ? (state.campaigns || []).find((c) => c.id === preview || c.slug === preview)
+      : null;
+
+    const activeList = (state.campaigns || [])
+      .map((c) => ({ ...c, effectiveStatus: getEffectiveCampaignStatus(c, now) }))
+      .filter((c) => c.effectiveStatus === 'ACTIVE' && c.active !== false)
+      .sort((a, b) => (b.priority || 0) - (a.priority || 0));
+
+    const activeCampaign = activeList[0] || null;
+
+    const resolved = resolveActiveHomeSections({
+      allSections: state.homeSections,
+      activeCampaign,
+      previewCampaign,
+      activeOnly: true,
+    });
+
+    return makeResponse(config, 200, resolved);
+  }
+
+  if (pathname === '/home-sections' && method === 'post') {
+    if (!Array.isArray(state.homeSections)) state.homeSections = [];
+    const targetCampId = (body.campaignId === 'base' || !body.campaignId) ? null : body.campaignId;
+
+    const newSection = {
+      id: `demo_sec_${Date.now()}`,
+      campaignId: targetCampId,
+      type: body.type,
+      order: Number(body.order || 0),
+      enabled: body.enabled !== false,
+      config: typeof body.config === 'object' ? body.config : JSON.parse(body.config || '{}'),
+      startsAt: body.startsAt || null,
+      endsAt: body.endsAt || null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    state.homeSections.push(newSection);
+    saveDemoState(state);
+    return makeResponse(config, 201, newSection);
+  }
+
+  if (pathname === '/home-sections/reorder' && method === 'put') {
+    if (!Array.isArray(state.homeSections)) state.homeSections = [];
+    const items = Array.isArray(body.items) ? body.items : [];
+    const orderMap = new Map(items.map((it) => [it.id, Number(it.order)]));
+
+    state.homeSections.forEach((s) => {
+      if (orderMap.has(s.id)) {
+        s.order = orderMap.get(s.id);
+        s.updatedAt = new Date().toISOString();
+      }
+    });
+
+    saveDemoState(state);
+    return makeResponse(config, 200, { success: true, count: items.length });
+  }
+
+  if (pathname === '/home-sections/apply-template' && method === 'post') {
+    if (!Array.isArray(state.homeSections)) state.homeSections = [];
+    const targetCampId = (body.campaignId === 'base' || !body.campaignId) ? null : body.campaignId;
+    const campaign = targetCampId ? (state.campaigns || []).find((c) => c.id === targetCampId) : null;
+    const suggested = getSuggestedHomeSectionsTemplate(body.templateKey, campaign);
+
+    // Remover anteriores
+    state.homeSections = state.homeSections.filter((s) => (s.campaignId || null) !== targetCampId);
+
+    // Agregar nuevas
+    suggested.forEach((s, idx) => {
+      state.homeSections.push({
+        id: `demo_sec_tmpl_${Date.now()}_${idx}`,
+        campaignId: targetCampId,
+        type: s.type,
+        order: s.order,
+        enabled: s.enabled !== false,
+        config: s.config || {},
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+    });
+
+    saveDemoState(state);
+
+    const updated = state.homeSections
+      .filter((s) => (s.campaignId || null) === targetCampId)
+      .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+    return makeResponse(config, 200, {
+      sections: updated,
+      activeCampaign: campaign,
+    });
+  }
+
+  if (pathname.match(/^\/home-sections\/[^/]+$/) && method === 'put') {
+    if (!Array.isArray(state.homeSections)) state.homeSections = [];
+    const id = decodeURIComponent(pathname.split('/')[2]);
+    const idx = state.homeSections.findIndex((s) => s.id === id);
+    if (idx === -1) throw makeError(config, 404, { error: 'Sección no encontrada' });
+
+    const current = state.homeSections[idx];
+    const updated = {
+      ...current,
+      ...body,
+      config: typeof body.config === 'object' ? body.config : (body.config !== undefined ? JSON.parse(body.config || '{}') : current.config),
+      updatedAt: new Date().toISOString(),
+    };
+    state.homeSections[idx] = updated;
+    saveDemoState(state);
+    return makeResponse(config, 200, updated);
+  }
+
+  if (pathname.match(/^\/home-sections\/[^/]+$/) && method === 'delete') {
+    if (!Array.isArray(state.homeSections)) state.homeSections = [];
+    const id = decodeURIComponent(pathname.split('/')[2]);
+    state.homeSections = state.homeSections.filter((s) => s.id !== id);
+    saveDemoState(state);
+    return makeResponse(config, 200, { success: true });
+  }
+
+  
+  // =========================================================================
+  // 14. NEWSLETTER (/newsletter/*)
+  // =========================================================================
+  if (pathname === '/newsletter/subscribe' && method === 'post') {
+    if (!Array.isArray(state.subscribers)) state.subscribers = [];
+    const email = String(body.email || '').toLowerCase().trim();
+    if (!email || !email.includes('@')) {
+      throw makeError(config, 400, { error: 'Ingresá un correo electrónico válido' });
+    }
+    if (body.consentGiven !== true) {
+      throw makeError(config, 400, { error: 'Debés aceptar el consentimiento explícito (Ley 25.326)' });
+    }
+
+    const existing = state.subscribers.find((s) => s.email === email);
+    const nowIso = new Date().toISOString();
+
+    if (existing) {
+      if (existing.active) {
+        return makeResponse(config, 200, {
+          message: 'Ya estás suscripto al newsletter de Tienda Nocturna.',
+          subscriber: existing,
+          alreadySubscribed: true,
+        });
+      }
+      existing.active = true;
+      existing.consentGiven = true;
+      existing.consentDate = nowIso;
+      existing.unsubscribedAt = null;
+      saveDemoState(state);
+      return makeResponse(config, 200, {
+        message: '¡Reactivamos tu suscripción al newsletter con éxito!',
+        subscriber: existing,
+        reactivated: true,
+      });
+    }
+
+    const newSub = {
+      id: `demo_sub_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      email,
+      consentGiven: true,
+      consentDate: nowIso,
+      active: true,
+      unsubscribedAt: null,
+      createdAt: nowIso,
+      updatedAt: nowIso,
+    };
+    state.subscribers.push(newSub);
+    saveDemoState(state);
+
+    return makeResponse(config, 201, {
+      message: '¡Te suscribiste exitosamente al newsletter de Tienda Nocturna!',
+      subscriber: newSub,
+      created: true,
+    });
+  }
+
+  if (pathname === '/newsletter/unsubscribe' && method === 'post') {
+    if (!Array.isArray(state.subscribers)) state.subscribers = [];
+    const email = String(body.email || '').toLowerCase().trim();
+    const existing = state.subscribers.find((s) => s.email === email);
+    if (existing) {
+      existing.active = false;
+      existing.unsubscribedAt = new Date().toISOString();
+      saveDemoState(state);
+    }
+    return makeResponse(config, 200, {
+      message: 'Te diste de baja del newsletter de Tienda Nocturna exitosamente.',
+      success: true,
+    });
+  }
+
+  if ((pathname === '/newsletter/admin/subscribers' || pathname === '/newsletter/subscribers') && method === 'get') {
+    if (!Array.isArray(state.subscribers)) state.subscribers = [];
+    return makeResponse(config, 200, {
+      subscribers: state.subscribers,
+      total: state.subscribers.length,
+    });
+  }
+
+  if ((pathname === '/newsletter/admin/export' || pathname === '/newsletter/export') && method === 'get') {
+    if (!Array.isArray(state.subscribers)) state.subscribers = [];
+    const activeSubs = state.subscribers.filter((s) => s.active !== false);
+    const bom = '\uFEFF';
+    const header = ['Email', 'Consentimiento Ley 25.326', 'Fecha Consentimiento', 'Estado', 'Fecha Suscripcion'].join(';');
+    const rows = activeSubs.map((s) => {
+      const email = `"${s.email.replace(/"/g, '""')}"`;
+      const consent = s.consentGiven ? 'SI (Explícito)' : 'NO';
+      const consentDate = s.consentDate || '';
+      const status = s.active ? 'Activo' : 'Baja';
+      const createdAt = s.createdAt || '';
+      return [email, consent, consentDate, status, createdAt].join(';');
+    });
+    const csvContent = bom + [header, ...rows].join('\r\n');
+    return makeResponse(config, 200, csvContent, {
+      'content-type': 'text/csv; charset=utf-8',
+    });
+  }
+
+  if (pathname === '/settings' && method === 'get') {
+    const s = state.settings || {
+      shippingCost: 4500,
+      freeShippingThreshold: 45000,
+      freePickupEnabled: true,
+      transferDiscountPercent: 10,
+      transferDiscountEnabled: true,
+      priceHistoryDays: 30,
+      generalTermsText: 'Envíos 100% discretos en empaque neutro sin identificación del contenido.',
+      shippingNoticeText: 'Envío gratis a todo el país superando el monto mínimo de compra.',
+      bankTransferInstructions: 'Transferencia bancaria. Te enviaremos los datos de CBU y Alias al confirmar el pedido por WhatsApp.',
+    };
+    return makeResponse(config, 200, s);
+  }
+
+  if (pathname === '/settings' && method === 'put') {
+    state.settings = {
+      ...(state.settings || {}),
+      ...(body || {}),
+      updatedAt: new Date().toISOString(),
+    };
+    saveDemoState(state);
+    return makeResponse(config, 200, state.settings);
   }
 
   throw makeError(config, 404, { error: `Endpoint no soportado en modo demo: ${method.toUpperCase()} ${pathname}` });

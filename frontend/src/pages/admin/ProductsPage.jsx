@@ -274,11 +274,25 @@ const ProductsPage = () => {
   const handleSubmit = async (formData) => {
     setLoading(true);
     try {
+      const { tagIds, ...productPayload } = formData;
+      let targetId = null;
+
       if (editingProduct) {
-        await client.put(`/products/${editingProduct._id || editingProduct.id}`, formData);
+        targetId = editingProduct._id || editingProduct.id;
+        await client.put(`/products/${targetId}`, productPayload);
       } else {
-        await client.post('/products', formData);
+        const res = await client.post('/products', productPayload);
+        targetId = res.data?.id || res.data?._id;
       }
+
+      if (targetId && Array.isArray(tagIds)) {
+        try {
+          await client.post('/tags/assign', { productId: targetId, tagIds });
+        } catch (tagErr) {
+          console.warn('Could not assign tags to product:', tagErr);
+        }
+      }
+
       await fetchProductsAndCategories();
       handleCloseModal();
     } catch (error) {

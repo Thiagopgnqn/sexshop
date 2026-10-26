@@ -26,7 +26,25 @@ const ProductCard = ({ product }) => {
     : Number(product.stock || 0);
   const isOutOfStock = totalStock <= 0;
 
-  const priceFormatted = Number(product.price || 0).toLocaleString('es-AR');
+  // Precios con motor de precios centralizado
+  const pricing = product.pricing || null;
+  const finalPrice = pricing?.finalPrice != null ? Number(pricing.finalPrice) : Number(product.price || 0);
+  const priceFormatted = finalPrice.toLocaleString('es-AR');
+  const compareAtPrice = pricing?.compareAtPrice != null ? Number(pricing.compareAtPrice) : null;
+  const savingsAmount = pricing?.savingsAmount != null ? Number(pricing.savingsAmount) : 0;
+  const discountPercent = pricing?.discountPercent != null ? Number(pricing.discountPercent) : 0;
+  const promoLabel = pricing?.promotionLabel || null;
+
+  // Precio por transferencia (10% OFF si no viene fijado)
+  const transferPrice = product.transferPrice
+    ? Number(product.transferPrice)
+    : Math.round(finalPrice * 0.9);
+
+  // Badges
+  const isNew = Boolean(product.isNew);
+  const isBestSeller = Boolean(product.isBestSeller);
+  const isLowStock = totalStock > 0 && totalStock <= 3;
+
   const categoryName =
     product.category?.parent?.name
       ? `${product.category.parent.name} · ${product.category.name}`
@@ -66,9 +84,26 @@ const ProductCard = ({ product }) => {
             <ProductPlaceholder label={product.category?.name || 'Nocturna'} />
           )}
 
-          {/* Badge de destacado o variantes */}
-          <div className="absolute top-2.5 left-2.5 z-10 flex flex-wrap gap-1.5">
-            {product.badge && <Badge variant="brand">{product.badge}</Badge>}
+          {/* Badges de promoción y catálogo */}
+          <div className="absolute top-2.5 left-2.5 z-10 flex flex-wrap gap-1.5 max-w-[85%]">
+            {discountPercent > 0 && (
+              <Badge variant="brand">{discountPercent}% OFF</Badge>
+            )}
+            {!discountPercent && product.activePromotions?.some((p) => p.kind === 'BUY_X_PAY_Y') && (
+              <Badge variant="brand">2x1</Badge>
+            )}
+            {!discountPercent && product.activePromotions?.some((p) => p.kind === 'BUNDLE_PRICE') && (
+              <Badge variant="brand">Combo</Badge>
+            )}
+            {isNew && !discountPercent && (
+              <Badge variant="neutral">Nuevo</Badge>
+            )}
+            {isBestSeller && (
+              <Badge variant="neutral">Más vendido</Badge>
+            )}
+            {product.badge && !discountPercent && product.badge !== 'Nuevo' && product.badge !== 'Más vendido' && (
+              <Badge variant="brand">{product.badge}</Badge>
+            )}
             {hasVariants && (
               <Badge variant="neutral">{activeVariants.length} opciones</Badge>
             )}
@@ -102,35 +137,59 @@ const ProductCard = ({ product }) => {
             </p>
           )}
 
-          {/* Precios */}
+          {/* Precios y Ahorro */}
           <div className="mt-auto pt-3 border-t border-brand-border/15">
-            <div className="flex items-baseline justify-between">
-              <div>
+            <div className="flex items-baseline justify-between gap-1 flex-wrap">
+              <div className="flex items-baseline flex-wrap gap-x-2">
                 {hasVariants && (
-                  <span className="text-[10px] uppercase tracking-wider text-content-muted mr-1.5">
+                  <span className="text-[10px] uppercase tracking-wider text-content-muted">
                     Desde
                   </span>
                 )}
-                <span className="text-base sm:text-lg font-semibold text-content tracking-tight">
+                <span className="text-base sm:text-lg font-bold text-content tracking-tight">
                   {themeConfig.brand.currencySymbol}{priceFormatted}
                 </span>
+
+                {/* REGLA LEGAL: Solo mostrar precio tachado si compareAtPrice fue verificado por PriceHistory */}
+                {compareAtPrice != null && compareAtPrice > finalPrice && (
+                  <span className="text-xs text-content-muted line-through">
+                    {themeConfig.brand.currencySymbol}{compareAtPrice.toLocaleString('es-AR')}
+                  </span>
+                )}
               </div>
-              {totalStock > 0 && totalStock <= 3 && (
-                <span className="text-[10px] font-medium text-amber-300 bg-amber-950/50 px-2 py-0.5 rounded border border-amber-800/40">
+
+              {isLowStock && (
+                <span className="text-[10px] font-medium text-amber-300 bg-amber-950/50 px-2 py-0.5 rounded border border-amber-800/40 whitespace-nowrap">
                   Últimas {totalStock} un.
                 </span>
               )}
             </div>
 
-            {product.transferPrice && (
-              <p className="text-[11px] text-emerald-300 font-medium mt-1">
-                <span>
-                  {themeConfig.brand.currencySymbol}
-                  {Number(product.transferPrice).toLocaleString('es-AR')}
-                </span>
-                <span className="text-content-muted font-normal ml-1">con transferencia</span>
-              </p>
+            {/* Ahorro comprobado */}
+            {compareAtPrice != null && savingsAmount > 0 && (
+              <div className="text-[11px] font-medium text-emerald-400 mt-1">
+                Ahorrás {themeConfig.brand.currencySymbol}{savingsAmount.toLocaleString('es-AR')}
+                {promoLabel && (
+                  <span className="text-content-muted font-normal ml-1">({promoLabel})</span>
+                )}
+              </div>
             )}
+
+            {/* Si no tiene compareAtPrice validado pero tiene promo activa, solo mostrar la etiqueta */}
+            {compareAtPrice == null && promoLabel && (
+              <div className="text-[11px] font-medium text-mauve mt-1">
+                Promoción: {promoLabel}
+              </div>
+            )}
+
+            {/* Transferencia */}
+            <p className="text-[11px] text-emerald-300 font-medium mt-1">
+              <span>
+                {themeConfig.brand.currencySymbol}
+                {transferPrice.toLocaleString('es-AR')}
+              </span>
+              <span className="text-content-muted font-normal ml-1">con transferencia (10% OFF)</span>
+            </p>
           </div>
         </div>
       </Link>

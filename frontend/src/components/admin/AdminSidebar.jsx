@@ -10,6 +10,12 @@ import {
   FiArrowLeft,
   FiX,
   FiRefreshCw,
+  FiZap,
+  FiGift,
+  FiLayers,
+  FiLayout,
+  FiTrendingUp,
+  FiSettings,
 } from 'react-icons/fi';
 import useAuth from '../../hooks/useAuth';
 import Logo from '../ui/Logo';
@@ -30,6 +36,15 @@ const AdminSidebar = ({ isOpen, onClose }) => {
     { name: 'Categorías y Subcategorías', to: '/admin/categorias', icon: FiTag },
     { name: 'Pedidos de Clientes', to: '/admin/pedidos', icon: FiShoppingBag },
     { name: 'Usuarios y Cuentas', to: '/admin/usuarios', icon: FiUsers },
+    { name: 'Configuración Tienda', to: '/admin/configuracion', icon: FiSettings },
+  ];
+
+  const marketingItems = [
+    { name: 'Métricas & Atribución', to: '/admin/marketing', icon: FiTrendingUp },
+    { name: 'Portada y Secciones', to: '/admin/portada', icon: FiLayout },
+    { name: 'Campañas y Promos', to: '/admin/campanas', icon: FiZap },
+    { name: 'Cupones de Descuento', to: '/admin/cupones', icon: FiGift },
+    { name: 'Colecciones y Etiquetas', to: '/admin/colecciones', icon: FiLayers },
   ];
 
   return (
@@ -87,6 +102,31 @@ const AdminSidebar = ({ isOpen, onClose }) => {
                   key={item.name}
                   to={item.to}
                   end={item.end}
+                  onClick={onClose}
+                  className={({ isActive }) =>
+                    `flex items-center space-x-3 px-3 py-2.5 rounded-md text-xs font-medium transition-colors ${
+                      isActive
+                        ? 'bg-brand text-content border border-mauve/30'
+                        : 'text-content-secondary hover:bg-surface-elevated hover:text-content'
+                    }`
+                  }
+                >
+                  <item.icon className="h-4 w-4 text-mauve" />
+                  <span>{item.name}</span>
+                </NavLink>
+              ))}
+            </nav>
+          </div>
+
+          <div className="px-3 py-2 border-t border-brand-border/15">
+            <p className="text-[10px] font-medium text-content-muted uppercase tracking-widest px-3 mb-2">
+              Marketing y Promos
+            </p>
+            <nav className="space-y-1">
+              {marketingItems.map((item) => (
+                <NavLink
+                  key={item.name}
+                  to={item.to}
                   onClick={onClose}
                   className={({ isActive }) =>
                     `flex items-center space-x-3 px-3 py-2.5 rounded-md text-xs font-medium transition-colors ${

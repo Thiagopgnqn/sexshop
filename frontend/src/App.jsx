@@ -12,6 +12,8 @@ import { isDemoMode, resetDemoState } from './api/demo/demoAdapter';
 
 import HomePage from './pages/HomePage';
 import CatalogPage from './pages/CatalogPage';
+import OffersPage from './pages/OffersPage';
+import CampaignLandingPage from './pages/CampaignLandingPage';
 import ProductPage from './pages/ProductPage';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
@@ -20,12 +22,21 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import NotFoundPage from './pages/NotFoundPage';
 
-import DashboardPage from './pages/admin/DashboardPage';
-import ProductsPage from './pages/admin/ProductsPage';
-import CategoriesPage from './pages/admin/CategoriesPage';
-import OrdersPage from './pages/admin/OrdersPage';
-import UsersPage from './pages/admin/UsersPage';
+// Lazy loaded admin screens (code splitting to optimize storefront bundle)
+const DashboardPage = React.lazy(() => import('./pages/admin/DashboardPage'));
+const ProductsPage = React.lazy(() => import('./pages/admin/ProductsPage'));
+const CategoriesPage = React.lazy(() => import('./pages/admin/CategoriesPage'));
+const OrdersPage = React.lazy(() => import('./pages/admin/OrdersPage'));
+const UsersPage = React.lazy(() => import('./pages/admin/UsersPage'));
+const CampaignsPage = React.lazy(() => import('./pages/admin/CampaignsPage'));
+const PortadaPage = React.lazy(() => import('./pages/admin/PortadaPage'));
+const CouponsPage = React.lazy(() => import('./pages/admin/CouponsPage'));
+const CollectionsPage = React.lazy(() => import('./pages/admin/CollectionsPage'));
+const MarketingDashboardPage = React.lazy(() => import('./pages/admin/MarketingDashboardPage'));
+const SettingsPage = React.lazy(() => import('./pages/admin/SettingsPage'));
+
 import ScrollToTop from './components/ScrollToTop';
+import ErrorBoundary from './components/layout/ErrorBoundary';
 import themeConfig from './config/theme';
 
 const ProtectedAdminRoute = ({ children }) => {
@@ -36,7 +47,7 @@ const ProtectedAdminRoute = ({ children }) => {
   if (!user || !isAdmin) return <Navigate to="/" />;
 
   return (
-    <div className="flex h-screen bg-canvas overflow-hidden text-content">
+    <div className="theme-admin flex h-screen bg-canvas overflow-hidden text-content">
       {/* Sidebar with responsive drawer */}
       <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
@@ -98,7 +109,22 @@ const ProtectedAdminRoute = ({ children }) => {
 
         {/* Page Content */}
         <main className={`flex-1 p-4 sm:p-8 overflow-y-auto bg-canvas ${isDemoMode() ? 'pb-16' : ''}`}>
-          <div className="max-w-7xl mx-auto">{children}</div>
+          <div className="max-w-7xl mx-auto">
+            <ErrorBoundary>
+              <React.Suspense
+                fallback={
+                  <div className="py-24 text-center">
+                    <div className="w-8 h-8 border-2 border-mauve border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                    <p className="text-xs uppercase tracking-widest text-content-secondary">
+                      Cargando módulo de administración...
+                    </p>
+                  </div>
+                }
+              >
+                {children}
+              </React.Suspense>
+            </ErrorBoundary>
+          </div>
         </main>
       </div>
       <DemoBanner />
@@ -116,6 +142,8 @@ function App() {
             <Route path="/" element={<Layout />}>
               <Route index element={<HomePage />} />
               <Route path="catalogo" element={<CatalogPage />} />
+              <Route path="ofertas" element={<OffersPage />} />
+              <Route path="campanas/:slug" element={<CampaignLandingPage />} />
               <Route path="producto/:id" element={<ProductPage />} />
               <Route path="carrito" element={<CartPage />} />
               <Route path="checkout" element={<CheckoutPage />} />
@@ -163,6 +191,54 @@ function App() {
               element={
                 <ProtectedAdminRoute>
                   <UsersPage />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/marketing"
+              element={
+                <ProtectedAdminRoute>
+                  <MarketingDashboardPage />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/campanas"
+              element={
+                <ProtectedAdminRoute>
+                  <CampaignsPage />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/portada"
+              element={
+                <ProtectedAdminRoute>
+                  <PortadaPage />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/cupones"
+              element={
+                <ProtectedAdminRoute>
+                  <CouponsPage />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/colecciones"
+              element={
+                <ProtectedAdminRoute>
+                  <CollectionsPage />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/configuracion"
+              element={
+                <ProtectedAdminRoute>
+                  <SettingsPage />
                 </ProtectedAdminRoute>
               }
             />

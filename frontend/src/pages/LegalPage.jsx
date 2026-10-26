@@ -2,7 +2,16 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import useSEO from '../hooks/useSEO';
 import themeConfig from '../config/theme';
-import { FiShield, FiTruck, FiRefreshCw, FiFileText, FiArrowLeft } from 'react-icons/fi';
+import {
+  FiShield,
+  FiTruck,
+  FiRefreshCw,
+  FiFileText,
+  FiArrowLeft,
+  FiTag,
+  FiPercent,
+  FiCheckCircle,
+} from 'react-icons/fi';
 
 const LegalPage = () => {
   useSEO({
@@ -109,6 +118,62 @@ const LegalPage = () => {
           <p className="text-xs sm:text-sm text-content-secondary leading-relaxed">
             {themeConfig.legal.ageDisclaimer} Al navegar y realizar pedidos en este sitio declarás bajo tu responsabilidad ser mayor de 18 años. Los precios expresados en pesos argentinos (ARS) pueden actualizarse sin previo aviso, respetándose el valor confirmado al momento de cerrar la orden por WhatsApp.
           </p>
+        </section>
+
+        {/* 6. Términos de Promociones, Campañas y Cupones */}
+        <section id="promociones" className="bg-surface p-6 sm:p-8 rounded-lg border border-brand-border/20 space-y-4">
+          <div className="flex items-center gap-2.5">
+            <FiTag className="text-mauve text-lg" />
+            <h2 className="font-display text-base uppercase tracking-widest text-content">
+              Términos y Condiciones de Promociones, Campañas y Cupones
+            </h2>
+          </div>
+          <div className="text-xs sm:text-sm text-content-secondary space-y-3 leading-relaxed">
+            <div>
+              <h3 className="font-semibold text-content mb-1">
+                Transparencia, Honestidad y Veracidad de Precios
+              </h3>
+              <p>
+                En Nocturna SexShop cumplimos estrictamente con la normativa vigente en materia de transparencia comercial y defensa del consumidor. Queda terminantemente prohibido el uso de precios tachados artificiales o descuentos engañosos. El precio de referencia tachado (&ldquo;antes $X&rdquo;) únicamente se exhibe en el sitio si coincide fehacientemente con el precio que dicho producto o variante tuvo vigente en el sistema durante los últimos 30 (treinta) días corridos. Si un artículo en oferta no cuenta con dicho antecedente histórico comprobable, se exhibe únicamente el precio final a pagar junto a la etiqueta informativa de la promoción.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-content mb-1">
+                Vigencia y Disponibilidad de Stock
+              </h3>
+              <p>
+                Las promociones, descuentos porcentuales, combos especiales y campañas temporales rigen exclusivamente durante el período de fechas indicado en cada ficha o hasta agotar el stock real disponible asignado a la promoción. Los indicadores de disponibilidad (&ldquo;Últimas unidades&rdquo;) reflejan stock físico real de nuestra tienda y no contadores ficticios.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-content mb-1">
+                Cupones de Descuento y Acumulabilidad
+              </h3>
+              <p>
+                Los cupones de descuento no son acumulables entre sí en un mismo pedido y no pueden canjearse por dinero en efectivo. Aquellos cupones que posean límite de uso por cliente se restringen a un único uso por persona, validado mediante correo electrónico o teléfono. En cupones con requisito de compra mínima, dicho umbral se computa sobre el subtotal resultante tras aplicar descuentos automáticos por ítem.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-content mb-1">
+                Bonificación por Transferencia Bancaria
+              </h3>
+              <p>
+                Ofrecemos una bonificación directa del 10% (diez por ciento) sobre el total del pedido al abonar mediante transferencia bancaria inmediata (CBU, CVU o Alias informado por WhatsApp al confirmar la orden).
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-content mb-1">
+                Envío Bonificado a Domicilio
+              </h3>
+              <p>
+                Las compras cuyo importe alcance o supere los $50.000 (cincuenta mil pesos argentinos) acceden a envío bonificado sin costo a domicilio en la ciudad de Córdoba y zonas de cobertura habitual.
+              </p>
+            </div>
+          </div>
         </section>
       </div>
     </div>

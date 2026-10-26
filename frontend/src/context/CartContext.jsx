@@ -1,5 +1,6 @@
-import React, { createContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useState, useEffect, useCallback, useMemo } from 'react';
 import Toast from '../components/ui/Toast';
+import client from '../api/client';
 import { trackAddToCart } from '../utils/metaPixel';
 import { isDemoMode, loadDemoState, saveDemoState } from '../api/demo/demoAdapter';
 import { resolveProductImage } from '../utils/productImages';
@@ -38,6 +39,32 @@ export const CartProvider = ({ children }) => {
     }
   });
 
+  const [couponCode, setCouponCode] = useState(() => {
+    try {
+      return localStorage.getItem('nocturna_coupon') || '';
+    } catch {
+      return '';
+    }
+  });
+
+  const [paymentMethod, setPaymentMethod] = useState('TRANSFER');
+  const [deliveryMethod, setDeliveryMethod] = useState('DELIVERY');
+  const [quote, setQuote] = useState(null);
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [couponError, setCouponError] = useState(null);
+  const [couponSuccess, setCouponSuccess] = useState(null);
+  const [storeSettings, setStoreSettings] = useState(null);
+
+  useEffect(() => {
+    client.get('/settings')
+      .then((res) => {
+        if (res.data) setStoreSettings(res.data);
+      })
+      .catch((err) => {
+        console.warn('No se pudo cargar settings en CartContext:', err.message);
+      });
+  }, []);
+
   useEffect(() => {
     try {
       localStorage.setItem('nocturna_cart', JSON.stringify(items));
@@ -51,6 +78,78 @@ export const CartProvider = ({ children }) => {
     }
   }, [items]);
 
+  const fetchQuote = useCallback(async (currentItems, code, payMethod, delMethod) => {
+    if (!Array.isArray(currentItems) || currentItems.length === 0) {
+      setQuote(null);
+      setCouponError(null);
+      return;
+    }
+    setQuoteLoading(true);
+    try {
+      const payload = {
+        items: currentItems.map((it) => ({
+          productId: it.product.id || it.product._id,
+          variantId: it.variant?.id || null,
+          quantity: it.quantity,
+        })),
+        couponCode: code ? code.trim() : null,
+        paymentMethod: payMethod || 'TRANSFER',
+        shippingContext: {
+          deliveryMethod: delMethod || 'DELIVERY',
+        },
+      };
+      const res = await client.post('/cart/quote', payload);
+      setQuote(res.data);
+      if (code && code.trim()) {
+        if (res.data?.couponError) {
+          setCouponError(res.data.couponError);
+          setCouponSuccess(null);
+        } else if (res.data?.coupon) {
+          setCouponError(null);
+          setCouponSuccess(`¡Cupón ${res.data.coupon.code} aplicado con éxito!`);
+        }
+      } else {
+        setCouponError(null);
+        setCouponSuccess(null);
+      }
+    } catch (err) {
+      console.error('Error al cotizar carrito:', err);
+    } finally {
+      setQuoteLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchQuote(items, couponCode, paymentMethod, deliveryMethod);
+  }, [items, couponCode, paymentMethod, deliveryMethod, fetchQuote]);
+
+  const applyCoupon = async (code) => {
+    const clean = String(code || '').trim().toUpperCase();
+    if (!clean) {
+      setCouponError('Ingresá un código de cupón.');
+      return;
+    }
+    setCouponCode(clean);
+    try {
+      localStorage.setItem('nocturna_coupon', clean);
+    } catch {
+      // ignore
+    }
+    fetchQuote(items, clean, paymentMethod, deliveryMethod);
+  };
+
+  const removeCoupon = () => {
+    setCouponCode('');
+    setCouponError(null);
+    setCouponSuccess(null);
+    try {
+      localStorage.removeItem('nocturna_coupon');
+    } catch {
+      // ignore
+    }
+    fetchQuote(items, '', paymentMethod, deliveryMethod);
+  };
+
   const [notification, setNotification] = useState({ show: false, message: '', product: null });
 
   const closeNotification = useCallback(() => {
@@ -62,7 +161,14 @@ export const CartProvider = ({ children }) => {
     const variantId = variant?.id || null;
     const key = getCartItemKey(productId, variantId);
     const maxStock = variant ? Number(variant.stock ?? 0) : Number(product.stock ?? 0);
-    const unitPrice = variant?.price != null ? Number(variant.price) : Number(product.price || 0);
+    const unitPrice =
+      variant?.pricing?.finalPrice != null
+        ? Number(variant.pricing.finalPrice)
+        : variant?.price != null
+        ? Number(variant.price)
+        : product?.pricing?.finalPrice != null
+        ? Number(product.pricing.finalPrice)
+        : Number(product.price || 0);
     const variantDescription = formatVariantDescription(variant);
 
     if (maxStock <= 0) return;
@@ -100,7 +206,7 @@ export const CartProvider = ({ children }) => {
       ];
     });
 
-    // Meta Pixel AddToCart — estrictamente ID/SKU numérico y valor, sin nombres ni categorías
+    // Meta Pixel AddToCart
     trackAddToCart({
       id: variant?.sku || product.sku || productId,
       price: unitPrice,
@@ -148,14 +254,52 @@ export const CartProvider = ({ children }) => {
     );
   };
 
-  const clearCart = () => setItems([]);
+  const clearCart = () => {
+    setItems([]);
+    setQuote(null);
+  };
 
   const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
-  const cartTotal = items.reduce((acc, item) => {
+
+  const fallbackSubtotal = items.reduce((acc, item) => {
     const unitPrice =
       item.variant?.price != null ? Number(item.variant.price) : Number(item.product.price || 0);
     return acc + unitPrice * item.quantity;
   }, 0);
+
+  const cartSubtotal = quote?.subtotal != null ? quote.subtotal : fallbackSubtotal;
+  const cartTotal = quote?.total != null ? quote.total : fallbackSubtotal;
+  const totalSavings = quote?.totalSavings ?? 0;
+
+  // Barra de progreso de envío gratis
+  const freeShippingThreshold = quote?.shipping?.freeShippingThreshold || storeSettings?.freeShippingThreshold || 45000;
+  const transferDiscountPercent =
+    storeSettings?.transferDiscountEnabled !== false ? (storeSettings?.transferDiscountPercent ?? 10) : 0;
+  const transferDiscountEnabled = storeSettings?.transferDiscountEnabled !== false && transferDiscountPercent > 0;
+
+  const subtotalForShipping = quote?.subtotalAfterPromotions ?? cartSubtotal;
+  const isFreeShipping = Boolean(quote?.shipping?.isFree);
+  const remainingForFreeShipping = Math.max(0, freeShippingThreshold - subtotalForShipping);
+  const freeShippingProgress = Math.min(
+    100,
+    Math.round((subtotalForShipping / freeShippingThreshold) * 100)
+  );
+
+  // Aviso de promoción por cantidad (ej: 2x1 en Cosmética íntima)
+  const quantityPromoNotice = useMemo(() => {
+    if (!Array.isArray(items) || items.length === 0) return null;
+    for (const it of items) {
+      const cat = it.product?.category?.slug || it.product?.category?.name || it.product?.categoryId || '';
+      if (cat.toLowerCase().includes('cosmetica') && it.quantity % 2 !== 0) {
+        return {
+          title: '¡Promoción 2x1 en Cosmética!',
+          text: 'Agregá 1 unidad más de Cosmética íntima y llevate el 2x1 en tu compra.',
+          type: '2x1',
+        };
+      }
+    }
+    return null;
+  }, [items]);
 
   return (
     <CartContext.Provider
@@ -166,7 +310,28 @@ export const CartProvider = ({ children }) => {
         updateQuantity,
         clearCart,
         cartCount,
+        cartSubtotal,
         cartTotal,
+        totalSavings,
+        quote,
+        quoteLoading,
+        couponCode,
+        couponError,
+        couponSuccess,
+        applyCoupon,
+        removeCoupon,
+        paymentMethod,
+        setPaymentMethod,
+        deliveryMethod,
+        setDeliveryMethod,
+        freeShippingThreshold,
+        remainingForFreeShipping,
+        freeShippingProgress,
+        isFreeShipping,
+        quantityPromoNotice,
+        storeSettings,
+        transferDiscountPercent,
+        transferDiscountEnabled,
       }}
     >
       {children}

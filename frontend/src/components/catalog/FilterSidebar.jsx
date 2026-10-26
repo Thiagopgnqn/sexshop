@@ -93,6 +93,31 @@ const FilterSidebar = ({ filters, setFilters, isOpen, onClose }) => {
 
   const content = (
     <div className="space-y-6">
+      {/* 0. Filtro Rápido Solo Ofertas */}
+      <div className="p-3.5 rounded-lg bg-surface-elevated/80 border border-mauve/40 shadow-soft">
+        <label className="flex items-center justify-between cursor-pointer">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-mauve animate-pulse" />
+            <span className="text-xs font-semibold text-content">Solo ofertas</span>
+          </div>
+          <input
+            type="checkbox"
+            checked={filters.onlyOffers === 'true'}
+            onChange={(e) =>
+              setFilters((prev) => ({
+                ...prev,
+                onlyOffers: e.target.checked ? 'true' : undefined,
+                page: 1,
+              }))
+            }
+            className="w-4 h-4 rounded border-brand-border/40 text-mauve focus:ring-mauve focus:ring-offset-0 bg-canvas cursor-pointer"
+          />
+        </label>
+        <p className="text-[10px] text-content-muted mt-1 leading-snug">
+          Ver artículos con promociones y descuentos comprobados.
+        </p>
+      </div>
+
       {/* 1. Categorías y Subcategorías */}
       <div>
         <div className="flex items-center justify-between pb-2 mb-3 border-b border-brand-border/20">
